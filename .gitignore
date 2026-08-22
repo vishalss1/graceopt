@@ -1,0 +1,28 @@
+# Build outputs
+build/
+build-*/
+out/
+*.o
+*.obj
+*.dll
+*.so
+*.dylib
+*.exe
+*.a
+*.lib
+
+# Generated IR/assembly from benchmarks
+bench/out/
+results/*.json
+results/*.csv
+!results/README.md
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Editors
+.vscode/
+.idea/
+*.swp
