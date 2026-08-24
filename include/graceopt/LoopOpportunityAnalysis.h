@@ -1,0 +1,71 @@
+//===-- LoopOpportunityAnalysis.h - Loop optimization opportunity report --===//
+//
+// A function analysis that inventories every loop and records what GraceOpt's
+// transformation passes could do with it: hoistable invariant instructions,
+// redundant computations, and whether the loop looks like a vectorization
+// candidate (and if not, why).
+//
+//===----------------------------------------------------------------------===//
+
+#ifndef GRACEOPT_LOOPOPPORTUNITYANALYSIS_H
+#define GRACEOPT_LOOPOPPORTUNITYANALYSIS_H
+
+#include "llvm/IR/PassManager.h"
+#include "llvm/Support/raw_ostream.h"
+
+#include <string>
+#include <vector>
+
+namespace llvm {
+class Function;
+class Instruction;
+class Loop;
+} // namespace llvm
+
+namespace graceopt {
+
+/// Report for a single natural loop.
+struct LoopReport {
+  const llvm::Loop *L = nullptr;
+  std::string HeaderName;
+  unsigned Depth = 0;
+  unsigned NumBlocks = 0;
+  unsigned NumInsts = 0;
+  /// Constant trip count if ScalarEvolution can prove one, otherwise 0.
+  unsigned TripCount = 0;
+  bool IsInnermost = false;
+};
+
+/// Report for a whole function.
+struct FunctionLoopReport {
+  std::vector<LoopReport> Loops;
+
+  void print(llvm::raw_ostream &OS) const;
+};
+
+/// Analysis pass producing a FunctionLoopReport.
+class LoopOpportunityAnalysis
+    : public llvm::AnalysisInfoMixin<LoopOpportunityAnalysis> {
+  friend llvm::AnalysisInfoMixin<LoopOpportunityAnalysis>;
+  static llvm::AnalysisKey Key;
+
+public:
+  using Result = FunctionLoopReport;
+  Result run(llvm::Function &F, llvm::FunctionAnalysisManager &FAM);
+};
+
+/// Printer pass: `-passes='print<grace-loop-analysis>'`.
+class LoopOpportunityPrinterPass
+    : public llvm::PassInfoMixin<LoopOpportunityPrinterPass> {
+  llvm::raw_ostream &OS;
+
+public:
+  explicit LoopOpportunityPrinterPass(llvm::raw_ostream &OS) : OS(OS) {}
+  llvm::PreservedAnalyses run(llvm::Function &F,
+                              llvm::FunctionAnalysisManager &FAM);
+  static bool isRequired() { return true; }
+};
+
+} // namespace graceopt
+
+#endif // GRACEOPT_LOOPOPPORTUNITYANALYSIS_H

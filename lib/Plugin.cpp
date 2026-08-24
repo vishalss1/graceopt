@@ -6,6 +6,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include "graceopt/LoopOpportunityAnalysis.h"
+
 #include "llvm/IR/Function.h"
 #include "llvm/IR/PassManager.h"
 #include "llvm/Passes/PassBuilder.h"
@@ -31,11 +33,19 @@ struct GraceHelloPass : PassInfoMixin<GraceHelloPass> {
 };
 
 void registerPasses(PassBuilder &PB) {
+  PB.registerAnalysisRegistrationCallback([](FunctionAnalysisManager &FAM) {
+    FAM.registerPass([] { return graceopt::LoopOpportunityAnalysis(); });
+  });
+
   PB.registerPipelineParsingCallback(
       [](StringRef Name, FunctionPassManager &FPM,
          ArrayRef<PassBuilder::PipelineElement>) {
         if (Name == "grace-hello") {
           FPM.addPass(GraceHelloPass());
+          return true;
+        }
+        if (Name == "print<grace-loop-analysis>") {
+          FPM.addPass(graceopt::LoopOpportunityPrinterPass(errs()));
           return true;
         }
         return false;
