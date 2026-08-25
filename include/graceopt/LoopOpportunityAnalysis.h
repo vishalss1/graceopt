@@ -24,6 +24,15 @@ class Loop;
 
 namespace graceopt {
 
+/// An instruction whose operands are all loop-invariant and that could be
+/// moved to the loop preheader.
+struct InvariantCandidate {
+  const llvm::Instruction *I = nullptr;
+  /// True when the instruction can be executed unconditionally before the
+  /// loop (no traps, no side effects, pointer provably dereferenceable).
+  bool SafeToSpeculate = false;
+};
+
 /// Report for a single natural loop.
 struct LoopReport {
   const llvm::Loop *L = nullptr;
@@ -34,6 +43,9 @@ struct LoopReport {
   /// Constant trip count if ScalarEvolution can prove one, otherwise 0.
   unsigned TripCount = 0;
   bool IsInnermost = false;
+
+  /// Instructions that GraceLICM could hoist out of this loop.
+  std::vector<InvariantCandidate> Invariants;
 };
 
 /// Report for a whole function.
