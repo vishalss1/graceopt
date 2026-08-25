@@ -55,6 +55,28 @@ struct LoopReport {
   std::vector<InvariantCandidate> Invariants;
   /// Pure computations duplicated within the loop body.
   std::vector<RedundantPair> Redundancies;
+
+  // --- Vectorization profile (meaningful for innermost loops only) ---
+  unsigned NumLoads = 0;
+  unsigned NumStores = 0;
+  /// Accesses whose address is an affine function of the induction variable
+  /// (contiguous or strided; vectorizable with plain or strided loads).
+  unsigned NumAffineAccesses = 0;
+  /// Accesses whose address does not change across iterations.
+  unsigned NumUniformAccesses = 0;
+  unsigned NumReductions = 0;
+  /// A floating-point reduction without reassociation permission. Such a loop
+  /// only vectorizes on targets with in-order reductions (e.g. SVE FADDA).
+  bool HasOrderedFPReduction = false;
+  /// Memory dependences require runtime alias checks before vectorizing.
+  bool NeedsRuntimeChecks = false;
+  /// Empty when the loop is a vectorization candidate; otherwise one entry per
+  /// reason that blocks the loop vectorizer.
+  std::vector<std::string> VecBlockers;
+
+  bool isVectorizationCandidate() const {
+    return IsInnermost && VecBlockers.empty();
+  }
 };
 
 /// Report for a whole function.

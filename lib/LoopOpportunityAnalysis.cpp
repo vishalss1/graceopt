@@ -4,8 +4,12 @@
 
 #include "llvm/ADT/SmallPtrSet.h"
 #include "llvm/Analysis/AliasAnalysis.h"
+#include "llvm/Analysis/IVDescriptors.h"
+#include "llvm/Analysis/LoopAccessAnalysis.h"
 #include "llvm/Analysis/LoopInfo.h"
 #include "llvm/Analysis/ScalarEvolution.h"
+#include "llvm/Analysis/ScalarEvolutionExpressions.h"
+#include "llvm/Analysis/TargetTransformInfo.h"
 #include "llvm/Analysis/ValueTracking.h"
 #include "llvm/IR/Dominators.h"
 #include "llvm/IR/Function.h"
@@ -152,8 +156,107 @@ void findRedundancies(Loop &L, DominatorTree &DT,
   }
 }
 
-LoopReport analyzeLoop(Loop &L, ScalarEvolution &SE, AAResults &AA,
-                       DominatorTree &DT) {
+/// Everything the analysis needs from the pass manager.
+struct AnalysisContext {
+  ScalarEvolution &SE;
+  AAResults &AA;
+  DominatorTree &DT;
+  LoopAccessInfoManager &LAIs;
+  TargetTransformInfo &TTI;
+};
+
+/// Populate the vectorization profile of an innermost loop, recording every
+/// reason the loop vectorizer would refuse it.
+void profileVectorization(Loop &L, AnalysisContext &Ctx, LoopReport &R) {
+  auto Block = [&](const Twine &Why) { R.VecBlockers.push_back(Why.str()); };
+
+  if (!L.isLoopSimplifyForm())
+    Block("loop is not in simplified form (missing preheader or latch)");
+  if (!L.getExitingBlock())
+    Block("multiple exiting blocks");
+  if (isa<SCEVCouldNotCompute>(Ctx.SE.getBackedgeTakenCount(&L)))
+    Block("trip count is not computable by ScalarEvolution");
+
+  // Instruction-level blockers and the memory access profile.
+  for (BasicBlock *BB : L.blocks()) {
+    for (Instruction &I : *BB) {
+      if (auto *CB = dyn_cast<CallBase>(&I)) {
+        if (!isa<IntrinsicInst>(CB)) {
+          StringRef Callee = CB->getCalledFunction()
+                                 ? CB->getCalledFunction()->getName()
+                                 : StringRef("<indirect>");
+          Block("call to '" + Callee + "'");
+        }
+        continue;
+      }
+      Value *Ptr = nullptr;
+      if (auto *LI = dyn_cast<LoadInst>(&I)) {
+        ++R.NumLoads;
+        Ptr = LI->getPointerOperand();
+        if (!LI->isSimple())
+          Block("volatile or atomic load");
+      } else if (auto *SI = dyn_cast<StoreInst>(&I)) {
+        ++R.NumStores;
+        Ptr = SI->getPointerOperand();
+        if (!SI->isSimple())
+          Block("volatile or atomic store");
+      }
+      if (!Ptr)
+        continue;
+      const SCEV *S = Ctx.SE.getSCEV(Ptr);
+      if (Ctx.SE.isLoopInvariant(S, &L)) {
+        ++R.NumUniformAccesses;
+      } else if (auto *AR = dyn_cast<SCEVAddRecExpr>(S);
+                 AR && AR->getLoop() == &L && AR->isAffine()) {
+        ++R.NumAffineAccesses;
+      } else {
+        Block("non-affine memory access (would need gather/scatter)");
+      }
+    }
+  }
+
+  // Loop-carried values: every header PHI must be an induction or a
+  // recognised reduction.
+  for (PHINode &Phi : L.getHeader()->phis()) {
+    InductionDescriptor ID;
+    if (InductionDescriptor::isInductionPHI(&Phi, &L, &Ctx.SE, ID))
+      continue;
+    RecurrenceDescriptor RD;
+    if (RecurrenceDescriptor::isReductionPHI(&Phi, &L, RD, /*DB=*/nullptr,
+                                             /*AC=*/nullptr, &Ctx.DT,
+                                             &Ctx.SE)) {
+      ++R.NumReductions;
+      if (RD.isOrdered()) {
+        R.HasOrderedFPReduction = true;
+        if (!Ctx.TTI.enableOrderedReductions())
+          Block("floating-point reduction lacks 'reassoc' and target has no "
+                "in-order vector reduction");
+      }
+      continue;
+    }
+    Block("unrecognised loop-carried value '" +
+          (Phi.hasName() ? Phi.getName() : StringRef("<unnamed phi>")) + "'");
+  }
+
+  // Memory dependence legality via LLVM's LoopAccessAnalysis, the same oracle
+  // the loop vectorizer consults.
+  if (R.NumStores > 0 && L.isLoopSimplifyForm()) {
+    const LoopAccessInfo &LAI = Ctx.LAIs.getInfo(L);
+    if (!LAI.canVectorizeMemory()) {
+      std::string Msg = "memory dependence prevents vectorization";
+      if (const auto *Rep = LAI.getReport())
+        Msg += ": " + Rep->getMsg();
+      Block(Msg);
+    } else if (LAI.getNumRuntimePointerChecks() > 0) {
+      R.NeedsRuntimeChecks = true;
+    }
+  }
+}
+
+LoopReport analyzeLoop(Loop &L, AnalysisContext &Ctx) {
+  ScalarEvolution &SE = Ctx.SE;
+  AAResults &AA = Ctx.AA;
+  DominatorTree &DT = Ctx.DT;
   LoopReport R;
   R.L = &L;
   R.HeaderName = L.getHeader()->hasName() ? L.getHeader()->getName().str()
@@ -183,6 +286,8 @@ LoopReport analyzeLoop(Loop &L, ScalarEvolution &SE, AAResults &AA,
       }
   }
   findRedundancies(L, DT, R.Redundancies);
+  if (R.IsInnermost)
+    profileVectorization(L, Ctx, R);
   return R;
 }
 
@@ -194,13 +299,16 @@ LoopOpportunityAnalysis::run(Function &F, FunctionAnalysisManager &FAM) {
   auto &SE = FAM.getResult<ScalarEvolutionAnalysis>(F);
   auto &AA = FAM.getResult<AAManager>(F);
   auto &DT = FAM.getResult<DominatorTreeAnalysis>(F);
+  auto &LAIs = FAM.getResult<LoopAccessAnalysis>(F);
+  auto &TTI = FAM.getResult<TargetIRAnalysis>(F);
+  AnalysisContext Ctx{SE, AA, DT, LAIs, TTI};
 
   FunctionLoopReport Report;
   // Visit loops outermost-first in program order so the printed report reads
   // naturally; nested loops follow their parent.
   for (Loop *Top : LI) {
     for (Loop *L : depth_first(Top))
-      Report.Loops.push_back(analyzeLoop(*L, SE, AA, DT));
+      Report.Loops.push_back(analyzeLoop(*L, Ctx));
   }
   return Report;
 }
@@ -240,6 +348,22 @@ void FunctionLoopReport::print(raw_ostream &OS) const {
         OS << "  ; duplicates ";
         P.Original->printAsOperand(OS, /*PrintType=*/false);
         OS << "\n";
+      }
+    }
+    if (R.IsInnermost) {
+      OS.indent(R.Depth * 2 + 2)
+          << "memory: loads=" << R.NumLoads << " stores=" << R.NumStores
+          << " affine=" << R.NumAffineAccesses
+          << " uniform=" << R.NumUniformAccesses
+          << " reductions=" << R.NumReductions
+          << (R.HasOrderedFPReduction ? " (ordered-fp)" : "")
+          << (R.NeedsRuntimeChecks ? " runtime-checks" : "") << "\n";
+      if (R.isVectorizationCandidate()) {
+        OS.indent(R.Depth * 2 + 2) << "vectorize: candidate\n";
+      } else {
+        OS.indent(R.Depth * 2 + 2) << "vectorize: blocked\n";
+        for (const std::string &Why : R.VecBlockers)
+          OS.indent(R.Depth * 2 + 4) << "- " << Why << "\n";
       }
     }
   }
