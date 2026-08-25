@@ -33,6 +33,13 @@ struct InvariantCandidate {
   bool SafeToSpeculate = false;
 };
 
+/// A computation inside the loop that recomputes a value already produced by
+/// an identical instruction (same opcode, type and operands) in the loop.
+struct RedundantPair {
+  const llvm::Instruction *Original = nullptr;
+  const llvm::Instruction *Duplicate = nullptr;
+};
+
 /// Report for a single natural loop.
 struct LoopReport {
   const llvm::Loop *L = nullptr;
@@ -46,6 +53,8 @@ struct LoopReport {
 
   /// Instructions that GraceLICM could hoist out of this loop.
   std::vector<InvariantCandidate> Invariants;
+  /// Pure computations duplicated within the loop body.
+  std::vector<RedundantPair> Redundancies;
 };
 
 /// Report for a whole function.

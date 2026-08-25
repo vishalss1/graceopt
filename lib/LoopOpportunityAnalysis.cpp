@@ -12,7 +12,10 @@
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/IntrinsicInst.h"
 
+#include <map>
 #include <optional>
+#include <tuple>
+#include <vector>
 
 using namespace llvm;
 using namespace graceopt;
@@ -86,6 +89,69 @@ classifyInvariant(Instruction &I, Loop &L, AAResults &AA, DominatorTree &DT,
   return C;
 }
 
+/// Is \p I a side-effect-free computation whose result depends only on its
+/// operands? Such instructions can be value-numbered.
+bool isPureComputation(const Instruction &I) {
+  if (isa<PHINode>(I) || isa<AllocaInst>(I) || isa<LandingPadInst>(I) ||
+      I.isTerminator() || I.isEHPad())
+    return false;
+  if (I.mayReadOrWriteMemory() || I.mayHaveSideEffects())
+    return false;
+  if (auto *CB = dyn_cast<CallBase>(&I))
+    return isa<IntrinsicInst>(CB) && CB->doesNotAccessMemory();
+  return true;
+}
+
+/// Structural key identifying "the same computation". Operands of commutative
+/// instructions are canonicalised so `a+b` and `b+a` collide.
+using ExprKey = std::tuple<unsigned, Type *, unsigned, std::vector<Value *>>;
+
+ExprKey makeExprKey(const Instruction &I) {
+  unsigned Extra = 0;
+  if (auto *Cmp = dyn_cast<CmpInst>(&I))
+    Extra = Cmp->getPredicate();
+  else if (auto *Cast = dyn_cast<CastInst>(&I))
+    Extra = Cast->getOpcode();
+  else if (auto *GEP = dyn_cast<GetElementPtrInst>(&I))
+    Extra = GEP->getSourceElementType()->getTypeID();
+  else if (auto *CB = dyn_cast<CallBase>(&I))
+    Extra = CB->getCalledFunction() ? CB->getCalledFunction()->getIntrinsicID()
+                                    : 0;
+  std::vector<Value *> Ops(I.op_begin(), I.op_end());
+  if (I.isCommutative() && Ops.size() == 2 && Ops[0] > Ops[1])
+    std::swap(Ops[0], Ops[1]);
+  return {I.getOpcode(), I.getType(), Extra, std::move(Ops)};
+}
+
+/// Find instructions in the loop that duplicate an earlier identical pure
+/// computation. Blocks are visited in dominator-tree order so the "original"
+/// is always the one that executes first.
+void findRedundancies(Loop &L, DominatorTree &DT,
+                      std::vector<RedundantPair> &Out) {
+  std::map<ExprKey, const Instruction *> Seen;
+  // Walk the dominator subtree rooted at the header; loop blocks are visited
+  // only after every block that dominates them.
+  for (DomTreeNode *N : depth_first(DT.getNode(L.getHeader()))) {
+    BasicBlock *BB = N->getBlock();
+    if (!L.contains(BB))
+      continue;
+    for (Instruction &I : *BB) {
+      if (!isPureComputation(I))
+        continue;
+      ExprKey K = makeExprKey(I);
+      auto It = Seen.find(K);
+      if (It == Seen.end()) {
+        Seen.emplace(std::move(K), &I);
+        continue;
+      }
+      // Only a dominating original makes the duplicate fully redundant; a
+      // sibling-branch twin would need partial redundancy elimination.
+      if (DT.dominates(It->second, &I))
+        Out.push_back({It->second, &I});
+    }
+  }
+}
+
 LoopReport analyzeLoop(Loop &L, ScalarEvolution &SE, AAResults &AA,
                        DominatorTree &DT) {
   LoopReport R;
@@ -116,6 +182,7 @@ LoopReport analyzeLoop(Loop &L, ScalarEvolution &SE, AAResults &AA,
         }
       }
   }
+  findRedundancies(L, DT, R.Redundancies);
   return R;
 }
 
@@ -161,6 +228,17 @@ void FunctionLoopReport::print(raw_ostream &OS) const {
         OS.indent(R.Depth * 2 + 4)
             << (C.SafeToSpeculate ? "[speculatable] " : "[guarded]      ");
         C.I->print(OS, /*IsForDebug=*/true);
+        OS << "\n";
+      }
+    }
+    if (!R.Redundancies.empty()) {
+      OS.indent(R.Depth * 2 + 2) << "redundant=" << R.Redundancies.size()
+                                 << ":\n";
+      for (const RedundantPair &P : R.Redundancies) {
+        OS.indent(R.Depth * 2 + 4);
+        P.Duplicate->print(OS, /*IsForDebug=*/true);
+        OS << "  ; duplicates ";
+        P.Original->printAsOperand(OS, /*PrintType=*/false);
         OS << "\n";
       }
     }
