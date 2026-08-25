@@ -4,6 +4,7 @@
 add_library(GraceOpt MODULE
   LoopOpportunityAnalysis.cpp
   Plugin.cpp
+  Utils.cpp
 )
 
 set_target_properties(GraceOpt PROPERTIES

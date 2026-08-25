@@ -1,6 +1,7 @@
 //===-- LoopOpportunityAnalysis.cpp - Loop optimization opportunity report ===//
 
 #include "graceopt/LoopOpportunityAnalysis.h"
+#include "graceopt/Utils.h"
 
 #include "llvm/ADT/SmallPtrSet.h"
 #include "llvm/Analysis/AliasAnalysis.h"
@@ -27,105 +28,6 @@ using namespace graceopt;
 AnalysisKey LoopOpportunityAnalysis::Key;
 
 namespace {
-
-/// Does any instruction in the loop possibly write memory that \p Load reads?
-bool loadMayBeClobberedInLoop(LoadInst &Load, Loop &L, AAResults &AA) {
-  MemoryLocation Loc = MemoryLocation::get(&Load);
-  for (BasicBlock *BB : L.blocks())
-    for (Instruction &I : *BB)
-      if (I.mayWriteToMemory() && isModSet(AA.getModRefInfo(&I, Loc)))
-        return true;
-  return false;
-}
-
-/// Decide whether \p I is a loop-invariant computation that could be hoisted
-/// to the preheader of \p L. Mirrors the legality rules GraceLICM applies.
-std::optional<InvariantCandidate>
-classifyInvariant(Instruction &I, Loop &L, AAResults &AA, DominatorTree &DT,
-                  const SmallPtrSetImpl<const Instruction *> &KnownInvariant) {
-  if (isa<PHINode>(I) || I.isTerminator() || I.isEHPad())
-    return std::nullopt;
-  // Operands must be invariant either because they are defined outside the
-  // loop, or because they are themselves candidates found earlier (so that
-  // chains like `t = a*b; u = t/c` are discovered transitively).
-  for (Value *Op : I.operands()) {
-    if (L.isLoopInvariant(Op))
-      continue;
-    if (auto *OpI = dyn_cast<Instruction>(Op); OpI && KnownInvariant.count(OpI))
-      continue;
-    return std::nullopt;
-  }
-  // Anything that writes memory, throws, or has other side effects stays put.
-  if (I.mayWriteToMemory() || I.mayThrow() || !I.willReturn())
-    return std::nullopt;
-  if (isa<AllocaInst>(I) || isa<CallBase>(I) && !isa<IntrinsicInst>(I))
-    return std::nullopt;
-  if (auto *Load = dyn_cast<LoadInst>(&I)) {
-    if (!Load->isSimple())
-      return std::nullopt;
-    if (loadMayBeClobberedInLoop(*Load, L, AA))
-      return std::nullopt;
-  } else if (I.mayReadFromMemory()) {
-    // Memory-reading intrinsics etc.: be conservative.
-    return std::nullopt;
-  }
-
-  InvariantCandidate C;
-  C.I = &I;
-  C.SafeToSpeculate = isSafeToSpeculativelyExecute(&I, /*CtxI=*/nullptr,
-                                                   /*AC=*/nullptr, &DT);
-  if (!C.SafeToSpeculate) {
-    // Not speculatable (e.g. a division that might trap, or a load from a
-    // pointer we cannot prove dereferenceable). It is still hoistable when the
-    // instruction is guaranteed to execute on every iteration, i.e. its block
-    // dominates every loop exit.
-    SmallVector<BasicBlock *, 4> Exits;
-    L.getExitBlocks(Exits);
-    bool DominatesExits = !Exits.empty();
-    for (BasicBlock *E : Exits)
-      if (!DT.dominates(I.getParent(), E)) {
-        DominatesExits = false;
-        break;
-      }
-    if (!DominatesExits)
-      return std::nullopt;
-  }
-  return C;
-}
-
-/// Is \p I a side-effect-free computation whose result depends only on its
-/// operands? Such instructions can be value-numbered.
-bool isPureComputation(const Instruction &I) {
-  if (isa<PHINode>(I) || isa<AllocaInst>(I) || isa<LandingPadInst>(I) ||
-      I.isTerminator() || I.isEHPad())
-    return false;
-  if (I.mayReadOrWriteMemory() || I.mayHaveSideEffects())
-    return false;
-  if (auto *CB = dyn_cast<CallBase>(&I))
-    return isa<IntrinsicInst>(CB) && CB->doesNotAccessMemory();
-  return true;
-}
-
-/// Structural key identifying "the same computation". Operands of commutative
-/// instructions are canonicalised so `a+b` and `b+a` collide.
-using ExprKey = std::tuple<unsigned, Type *, unsigned, std::vector<Value *>>;
-
-ExprKey makeExprKey(const Instruction &I) {
-  unsigned Extra = 0;
-  if (auto *Cmp = dyn_cast<CmpInst>(&I))
-    Extra = Cmp->getPredicate();
-  else if (auto *Cast = dyn_cast<CastInst>(&I))
-    Extra = Cast->getOpcode();
-  else if (auto *GEP = dyn_cast<GetElementPtrInst>(&I))
-    Extra = GEP->getSourceElementType()->getTypeID();
-  else if (auto *CB = dyn_cast<CallBase>(&I))
-    Extra = CB->getCalledFunction() ? CB->getCalledFunction()->getIntrinsicID()
-                                    : 0;
-  std::vector<Value *> Ops(I.op_begin(), I.op_end());
-  if (I.isCommutative() && Ops.size() == 2 && Ops[0] > Ops[1])
-    std::swap(Ops[0], Ops[1]);
-  return {I.getOpcode(), I.getType(), Extra, std::move(Ops)};
-}
 
 /// Find instructions in the loop that duplicate an earlier identical pure
 /// computation. Blocks are visited in dominator-tree order so the "original"
@@ -278,9 +180,9 @@ LoopReport analyzeLoop(Loop &L, AnalysisContext &Ctx) {
       for (Instruction &I : *BB) {
         if (Known.count(&I))
           continue;
-        if (auto C = classifyInvariant(I, L, AA, DT, Known)) {
+        if (auto Info = classifyLoopInvariant(I, L, AA, DT, Known)) {
           Known.insert(&I);
-          R.Invariants.push_back(*C);
+          R.Invariants.push_back({&I, Info->SafeToSpeculate});
           Changed = true;
         }
       }
