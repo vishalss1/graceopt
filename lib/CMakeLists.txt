@@ -2,6 +2,7 @@
 # clang via -fpass-plugin. We link against the LLVM dylib so that symbols
 # resolve against the same copy of LLVM the host tool uses.
 add_library(GraceOpt MODULE
+  GraceLICM.cpp
   LoopOpportunityAnalysis.cpp
   Plugin.cpp
   Utils.cpp

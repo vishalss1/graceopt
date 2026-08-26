@@ -32,6 +32,9 @@ struct InvariantInfo {
   /// The instruction may execute unconditionally before the loop: it cannot
   /// trap, has no side effects and any pointer it reads is dereferenceable.
   bool SafeToSpeculate = false;
+  /// The instruction's block dominates every loop exit, so it already runs on
+  /// every trip through the loop body.
+  bool GuaranteedToExecute = false;
 };
 
 /// Does any instruction in \p L possibly write memory that \p Load reads?

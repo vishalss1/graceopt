@@ -55,19 +55,22 @@ classifyLoopInvariant(Instruction &I, Loop &L, AAResults &AA,
   InvariantInfo Info;
   Info.SafeToSpeculate = isSafeToSpeculativelyExecute(&I, /*CtxI=*/nullptr,
                                                       /*AC=*/nullptr, &DT);
-  if (!Info.SafeToSpeculate) {
-    // Not speculatable (e.g. a division that might trap, or a load from a
-    // pointer we cannot prove dereferenceable). Still hoistable when the
-    // instruction is guaranteed to execute on every iteration, i.e. its block
-    // dominates every loop exit.
-    SmallVector<BasicBlock *, 4> Exits;
-    L.getExitBlocks(Exits);
-    if (Exits.empty())
-      return std::nullopt;
-    for (BasicBlock *E : Exits)
-      if (!DT.dominates(I.getParent(), E))
-        return std::nullopt;
-  }
+  // Guaranteed to execute on every trip through the body when the block
+  // dominates every loop exit (true for the body of a rotated loop, false for
+  // the body of a loop whose header holds the exit test).
+  SmallVector<BasicBlock *, 4> Exits;
+  L.getExitBlocks(Exits);
+  Info.GuaranteedToExecute = !Exits.empty();
+  for (BasicBlock *E : Exits)
+    if (!DT.dominates(I.getParent(), E)) {
+      Info.GuaranteedToExecute = false;
+      break;
+    }
+  // Not speculatable (e.g. a division that might trap, or a load from a
+  // pointer we cannot prove dereferenceable) and not guaranteed to execute:
+  // hoisting could introduce a fault that the original program never had.
+  if (!Info.SafeToSpeculate && !Info.GuaranteedToExecute)
+    return std::nullopt;
   return Info;
 }
 

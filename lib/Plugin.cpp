@@ -6,6 +6,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include "graceopt/GraceLICM.h"
 #include "graceopt/LoopOpportunityAnalysis.h"
 
 #include "llvm/IR/Function.h"
@@ -42,6 +43,10 @@ void registerPasses(PassBuilder &PB) {
          ArrayRef<PassBuilder::PipelineElement>) {
         if (Name == "grace-hello") {
           FPM.addPass(GraceHelloPass());
+          return true;
+        }
+        if (Name == "grace-licm") {
+          FPM.addPass(graceopt::GraceLICMPass());
           return true;
         }
         if (Name == "print<grace-loop-analysis>") {
