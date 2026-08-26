@@ -33,3 +33,17 @@ if(NOT LLVM_ENABLE_EH)
 endif()
 
 add_subdirectory(lib)
+
+# `cmake --build build --target check` runs the FileCheck-based regression
+# tests with the freshly built plugin.
+find_package(Python3 COMPONENTS Interpreter)
+if(Python3_Interpreter_FOUND)
+  add_custom_target(check
+    COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/test/run_tests.py
+            --llvm-bin ${LLVM_TOOLS_BINARY_DIR}
+            --plugin $<TARGET_FILE:GraceOpt>
+    DEPENDS GraceOpt
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    COMMENT "Running GraceOpt regression tests"
+    USES_TERMINAL)
+endif()
