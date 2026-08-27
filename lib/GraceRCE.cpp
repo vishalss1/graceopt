@@ -35,6 +35,22 @@ Instruction *findDominatingDef(AvailableMap &Avail, const ExprKey &K,
   return nullptr;
 }
 
+/// Block-local memory state: values known to be in memory at (pointer, type),
+/// either because they were just loaded or just stored. Any instruction that
+/// may write memory invalidates the whole table; this is deliberately simple
+/// and does not consult alias analysis.
+using MemKey = std::pair<Value *, Type *>;
+using AvailableMemory = std::map<MemKey, Value *>;
+
+/// Try to satisfy \p Load from a value already known to be in memory in this
+/// block. Returns the replacement value or nullptr.
+Value *findAvailableLoad(AvailableMemory &Mem, LoadInst &Load) {
+  if (!Load.isSimple())
+    return nullptr;
+  auto It = Mem.find({Load.getPointerOperand(), Load.getType()});
+  return It == Mem.end() ? nullptr : It->second;
+}
+
 unsigned eliminateRedundancies(Function &F, DominatorTree &DT) {
   AvailableMap Avail;
   unsigned NumRemoved = 0;
@@ -42,7 +58,28 @@ unsigned eliminateRedundancies(Function &F, DominatorTree &DT) {
   // Dominator-tree preorder guarantees that every instruction that could make
   // the current one redundant has already been recorded.
   for (DomTreeNode *N : depth_first(DT.getRootNode())) {
+    AvailableMemory Mem; // Memory facts do not survive across blocks.
     for (Instruction &I : make_early_inc_range(*N->getBlock())) {
+      if (auto *Load = dyn_cast<LoadInst>(&I)) {
+        if (Value *V = findAvailableLoad(Mem, *Load)) {
+          LLVM_DEBUG(dbgs() << "[grace-rce] forwarding " << *V << " to " << I
+                            << "\n");
+          Load->replaceAllUsesWith(V);
+          Load->eraseFromParent();
+          ++NumRemoved;
+        } else if (Load->isSimple()) {
+          Mem[{Load->getPointerOperand(), Load->getType()}] = Load;
+        }
+        continue;
+      }
+      if (I.mayWriteToMemory()) {
+        Mem.clear();
+        // A plain store leaves exactly one known value behind: its own.
+        if (auto *Store = dyn_cast<StoreInst>(&I); Store && Store->isSimple())
+          Mem[{Store->getPointerOperand(),
+               Store->getValueOperand()->getType()}] = Store->getValueOperand();
+        continue;
+      }
       if (!isPureComputation(I) || I.getType()->isVoidTy())
         continue;
       ExprKey K = makeExprKey(I);
