@@ -4,6 +4,8 @@
 #include "graceopt/Utils.h"
 
 #include "llvm/ADT/SmallVector.h"
+#include "llvm/ADT/Statistic.h"
+#include "llvm/Analysis/OptimizationRemarkEmitter.h"
 #include "llvm/IR/Dominators.h"
 #include "llvm/IR/Function.h"
 #include "llvm/IR/Instructions.h"
@@ -15,6 +17,11 @@ using namespace llvm;
 using namespace graceopt;
 
 #define DEBUG_TYPE "grace-rce"
+
+STATISTIC(NumComputationsRemoved,
+          "Number of redundant pure computations eliminated");
+STATISTIC(NumLoadsForwarded,
+          "Number of loads replaced by an earlier load or store in the block");
 
 namespace {
 
@@ -51,7 +58,8 @@ Value *findAvailableLoad(AvailableMemory &Mem, LoadInst &Load) {
   return It == Mem.end() ? nullptr : It->second;
 }
 
-unsigned eliminateRedundancies(Function &F, DominatorTree &DT) {
+unsigned eliminateRedundancies(Function &F, DominatorTree &DT,
+                               OptimizationRemarkEmitter &ORE) {
   AvailableMap Avail;
   unsigned NumRemoved = 0;
 
@@ -64,9 +72,14 @@ unsigned eliminateRedundancies(Function &F, DominatorTree &DT) {
         if (Value *V = findAvailableLoad(Mem, *Load)) {
           LLVM_DEBUG(dbgs() << "[grace-rce] forwarding " << *V << " to " << I
                             << "\n");
+          ORE.emit([&]() {
+            return OptimizationRemark(DEBUG_TYPE, "LoadForwarded", Load)
+                   << "forwarded earlier value to redundant load";
+          });
           Load->replaceAllUsesWith(V);
           Load->eraseFromParent();
           ++NumRemoved;
+          ++NumLoadsForwarded;
         } else if (Load->isSimple()) {
           Mem[{Load->getPointerOperand(), Load->getType()}] = Load;
         }
@@ -89,9 +102,15 @@ unsigned eliminateRedundancies(Function &F, DominatorTree &DT) {
         // Only facts true of both copies may survive on the merged value:
         // `add nsw` + `add` must become a plain `add`.
         Def->andIRFlags(&I);
+        ORE.emit([&]() {
+          return OptimizationRemark(DEBUG_TYPE, "Eliminated", &I)
+                 << "eliminated redundant "
+                 << ore::NV("Opcode", I.getOpcodeName());
+        });
         I.replaceAllUsesWith(Def);
         I.eraseFromParent();
         ++NumRemoved;
+        ++NumComputationsRemoved;
         continue;
       }
       Avail[std::move(K)].push_back(&I);
@@ -104,7 +123,8 @@ unsigned eliminateRedundancies(Function &F, DominatorTree &DT) {
 
 PreservedAnalyses GraceRCEPass::run(Function &F, FunctionAnalysisManager &FAM) {
   auto &DT = FAM.getResult<DominatorTreeAnalysis>(F);
-  if (eliminateRedundancies(F, DT) == 0)
+  auto &ORE = FAM.getResult<OptimizationRemarkEmitterAnalysis>(F);
+  if (eliminateRedundancies(F, DT, ORE) == 0)
     return PreservedAnalyses::all();
   PreservedAnalyses PA;
   PA.preserveSet<CFGAnalyses>();

@@ -1,4 +1,5 @@
 ; RUN: %opt -passes="grace-licm" -S %s | FileCheck %s
+; RUN: %opt -passes="grace-licm" -pass-remarks=grace-licm -disable-output %s 2>&1 | FileCheck %s --check-prefix=REMARK
 ;
 ; An invariant chain (a*b, then /c) in the loop body is hoisted to the
 ; preheader as a unit; the loop body keeps only iteration-dependent work.
@@ -39,3 +40,6 @@ exit:
 ; CHECK-NOT:     fdiv
 ; CHECK:         %t = fmul float %div, %xv
 ; CHECK:         store float %r, ptr %yp
+
+; REMARK: remark: {{.*}}hoisted loop-invariant fmul out of loop 'header'
+; REMARK: remark: {{.*}}hoisted loop-invariant fdiv out of loop 'header'

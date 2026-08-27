@@ -3,8 +3,10 @@
 #include "graceopt/GraceVecHints.h"
 #include "graceopt/LoopOpportunityAnalysis.h"
 
+#include "llvm/ADT/Statistic.h"
 #include "llvm/Analysis/IVDescriptors.h"
 #include "llvm/Analysis/LoopInfo.h"
+#include "llvm/Analysis/OptimizationRemarkEmitter.h"
 #include "llvm/Analysis/ScalarEvolution.h"
 #include "llvm/IR/Dominators.h"
 #include "llvm/IR/Function.h"
@@ -20,6 +22,10 @@ using namespace llvm;
 using namespace graceopt;
 
 #define DEBUG_TYPE "grace-vec-hints"
+
+STATISTIC(NumLoopsHinted, "Number of loops annotated with vectorization hints");
+STATISTIC(NumReductionsReassociated,
+          "Number of FP reduction chains granted reassoc");
 
 // Command line knobs. They are read by opt (-grace-...) and by clang through
 // -mllvm -grace-....
@@ -107,6 +113,7 @@ PreservedAnalyses GraceVecHintsPass::run(Function &F,
   auto &Report = FAM.getResult<LoopOpportunityAnalysis>(F);
   auto &DT = FAM.getResult<DominatorTreeAnalysis>(F);
   auto &SE = FAM.getResult<ScalarEvolutionAnalysis>(F);
+  auto &ORE = FAM.getResult<OptimizationRemarkEmitterAnalysis>(F);
   TargetProfile TP = profileTarget(F);
 
   bool Changed = false;
@@ -127,8 +134,16 @@ PreservedAnalyses GraceVecHintsPass::run(Function &F,
           RecurrenceDescriptor RD;
           if (RecurrenceDescriptor::isReductionPHI(&Phi, &L, RD, nullptr,
                                                    nullptr, &DT, &SE) &&
-              RD.isOrdered())
-            Changed |= allowReassociation(Phi, L, RD);
+              RD.isOrdered() && allowReassociation(Phi, L, RD)) {
+            Changed = true;
+            ++NumReductionsReassociated;
+            ORE.emit([&]() {
+              return OptimizationRemark(DEBUG_TYPE, "Reassociated",
+                                        L.getStartLoc(), L.getHeader())
+                     << "granted reassoc to FP reduction so the loop can "
+                        "vectorize";
+            });
+          }
         }
         Candidate = true;
       }
@@ -153,6 +168,14 @@ PreservedAnalyses GraceVecHintsPass::run(Function &F,
     LLVM_DEBUG(dbgs() << "[grace-vec-hints] annotated loop '"
                       << L.getHeader()->getName() << "' interleave="
                       << TP.InterleaveCount << "\n");
+    ++NumLoopsHinted;
+    ORE.emit([&]() {
+      return OptimizationRemark(DEBUG_TYPE, "Hinted", L.getStartLoc(),
+                                L.getHeader())
+             << "vectorization candidate; requested interleave count "
+             << ore::NV("Interleave", TP.InterleaveCount)
+             << (TP.CPU.empty() ? "" : " for cpu ") << ore::NV("CPU", TP.CPU);
+    });
   }
 
   if (!Changed)
