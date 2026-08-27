@@ -8,6 +8,7 @@
 
 #include "graceopt/GraceLICM.h"
 #include "graceopt/GraceRCE.h"
+#include "graceopt/GraceVecHints.h"
 #include "graceopt/LoopOpportunityAnalysis.h"
 
 #include "llvm/IR/Function.h"
@@ -52,6 +53,10 @@ void registerPasses(PassBuilder &PB) {
         }
         if (Name == "grace-rce") {
           FPM.addPass(graceopt::GraceRCEPass());
+          return true;
+        }
+        if (Name == "grace-vec-hints") {
+          FPM.addPass(graceopt::GraceVecHintsPass());
           return true;
         }
         if (Name == "print<grace-loop-analysis>") {

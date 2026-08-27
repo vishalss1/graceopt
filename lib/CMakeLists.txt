@@ -4,6 +4,7 @@
 add_library(GraceOpt MODULE
   GraceLICM.cpp
   GraceRCE.cpp
+  GraceVecHints.cpp
   LoopOpportunityAnalysis.cpp
   Plugin.cpp
   Utils.cpp
