@@ -1,7 +1,8 @@
 ; RUN: %opt -passes="grace-rce" -S %s | FileCheck %s
 ;
 ; Identical pure computations are replaced by the first (dominating) copy.
-; Commutative operands are canonicalised, so b+a reuses a+b.
+; Commutative operands are canonicalised, so b+a reuses a+b. Once the two GEPs
+; collapse, the second load reads the same address and is forwarded too.
 
 define i64 @index_math(ptr %p, i32 %i, i32 %j) {
 entry:
@@ -23,8 +24,7 @@ entry:
 ; CHECK-NEXT:    %sum1 = add i64 %a, %a
 ; CHECK-NEXT:    %g1 = getelementptr inbounds i64, ptr %p, i64 %sum1
 ; CHECK-NEXT:    %v1 = load i64, ptr %g1
-; CHECK-NEXT:    %v2 = load i64, ptr %g1
-; CHECK-NEXT:    %r = add i64 %v1, %v2
+; CHECK-NEXT:    %r = add i64 %v1, %v1
 ; CHECK-NEXT:    ret i64 %r
 
 ; Different predicates / cast kinds are different computations.
