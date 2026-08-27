@@ -3,6 +3,7 @@
 # resolve against the same copy of LLVM the host tool uses.
 add_library(GraceOpt MODULE
   GraceLICM.cpp
+  GraceRCE.cpp
   LoopOpportunityAnalysis.cpp
   Plugin.cpp
   Utils.cpp
