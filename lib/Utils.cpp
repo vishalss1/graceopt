@@ -3,17 +3,47 @@
 #include "graceopt/Utils.h"
 
 #include "llvm/Analysis/AliasAnalysis.h"
+#include "llvm/Analysis/AssumptionCache.h"
 #include "llvm/Analysis/LoopInfo.h"
 #include "llvm/Analysis/MemoryLocation.h"
+#include "llvm/Analysis/ScalarEvolution.h"
 #include "llvm/Analysis/ValueTracking.h"
 #include "llvm/IR/Dominators.h"
 #include "llvm/IR/Function.h"
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/IntrinsicInst.h"
+#include "llvm/IR/PassManager.h"
+#include "llvm/Transforms/Utils/LoopSimplify.h"
 
 using namespace llvm;
 
 namespace graceopt {
+
+bool simplifyAllLoops(Function &F, FunctionAnalysisManager &FAM) {
+  auto &LI = FAM.getResult<LoopAnalysis>(F);
+  if (LI.empty())
+    return false;
+  auto &DT = FAM.getResult<DominatorTreeAnalysis>(F);
+  auto &SE = FAM.getResult<ScalarEvolutionAnalysis>(F);
+  auto &AC = FAM.getResult<AssumptionAnalysis>(F);
+
+  bool Changed = false;
+  for (Loop *L : LI)
+    Changed |= simplifyLoop(L, &DT, &LI, &SE, &AC, /*MSSAU=*/nullptr,
+                            /*PreserveLCSSA=*/false);
+  if (!Changed)
+    return false;
+
+  // simplifyLoop kept DT/LI/SE/AC consistent; everything else that was
+  // cached for F may now describe a stale CFG.
+  PreservedAnalyses PA;
+  PA.preserve<DominatorTreeAnalysis>();
+  PA.preserve<LoopAnalysis>();
+  PA.preserve<ScalarEvolutionAnalysis>();
+  PA.preserve<AssumptionAnalysis>();
+  FAM.invalidate(F, PA);
+  return true;
+}
 
 bool loadMayBeClobberedInLoop(LoadInst &Load, Loop &L, AAResults &AA) {
   MemoryLocation Loc = MemoryLocation::get(&Load);

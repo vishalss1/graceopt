@@ -10,6 +10,7 @@
 #define GRACEOPT_UTILS_H
 
 #include "llvm/ADT/SmallPtrSet.h"
+#include "llvm/IR/PassManager.h"
 
 #include <optional>
 #include <tuple>
@@ -17,10 +18,14 @@
 
 namespace llvm {
 class AAResults;
+class AssumptionCache;
 class DominatorTree;
+class Function;
 class Instruction;
 class LoadInst;
 class Loop;
+class LoopInfo;
+class ScalarEvolution;
 class Type;
 class Value;
 } // namespace llvm
@@ -36,6 +41,15 @@ struct InvariantInfo {
   /// every trip through the loop body.
   bool GuaranteedToExecute = false;
 };
+
+/// Put every loop of \p F into loop-simplify form (dedicated preheader, single
+/// latch, dedicated exits), which the GraceOpt passes rely on just like LLVM's
+/// own loop passes do. Passes placed at pipeline extension points cannot
+/// assume that form still holds, because SimplifyCFG may have merged the
+/// preheader away. Updates the analyses in place and, when the CFG changed,
+/// invalidates every other cached function analysis via \p FAM.
+/// Returns true if the CFG changed.
+bool simplifyAllLoops(llvm::Function &F, llvm::FunctionAnalysisManager &FAM);
 
 /// Does any instruction in \p L possibly write memory that \p Load reads?
 bool loadMayBeClobberedInLoop(llvm::LoadInst &Load, llvm::Loop &L,

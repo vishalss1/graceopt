@@ -85,6 +85,8 @@ unsigned hoistLoopInvariants(Loop &L, AAResults &AA, DominatorTree &DT,
 
 PreservedAnalyses GraceLICMPass::run(Function &F,
                                      FunctionAnalysisManager &FAM) {
+  // Guarantee preheaders to hoist into, whatever ran before us.
+  bool CFGChanged = simplifyAllLoops(F, FAM);
   auto &LI = FAM.getResult<LoopAnalysis>(F);
   auto &DT = FAM.getResult<DominatorTreeAnalysis>(F);
   auto &AA = FAM.getResult<AAManager>(F);
@@ -97,12 +99,13 @@ PreservedAnalyses GraceLICMPass::run(Function &F,
   for (Loop *L : reverse(Loops))
     Total += hoistLoopInvariants(*L, AA, DT, ORE);
 
-  if (Total == 0)
+  if (Total == 0 && !CFGChanged)
     return PreservedAnalyses::all();
 
-  // Instructions moved, but no block or edge was added or removed.
   PreservedAnalyses PA;
-  PA.preserveSet<CFGAnalyses>();
+  if (!CFGChanged)
+    PA.preserveSet<CFGAnalyses>(); // Instructions moved, no edges touched.
+  PA.preserve<DominatorTreeAnalysis>();
   PA.preserve<LoopAnalysis>();
   PA.preserve<ScalarEvolutionAnalysis>();
   return PA;

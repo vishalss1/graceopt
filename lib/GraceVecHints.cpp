@@ -2,6 +2,7 @@
 
 #include "graceopt/GraceVecHints.h"
 #include "graceopt/LoopOpportunityAnalysis.h"
+#include "graceopt/Utils.h"
 
 #include "llvm/ADT/Statistic.h"
 #include "llvm/Analysis/IVDescriptors.h"
@@ -110,6 +111,9 @@ bool allowReassociation(PHINode &Phi, Loop &L, RecurrenceDescriptor &RD) {
 
 PreservedAnalyses GraceVecHintsPass::run(Function &F,
                                          FunctionAnalysisManager &FAM) {
+  // The loop vectorizer simplifies loops before judging them; do the same so
+  // the analysis sees the loops the way the vectorizer will.
+  bool CFGChanged = simplifyAllLoops(F, FAM);
   auto &Report = FAM.getResult<LoopOpportunityAnalysis>(F);
   auto &DT = FAM.getResult<DominatorTreeAnalysis>(F);
   auto &SE = FAM.getResult<ScalarEvolutionAnalysis>(F);
@@ -178,11 +182,12 @@ PreservedAnalyses GraceVecHintsPass::run(Function &F,
     });
   }
 
-  if (!Changed)
+  if (!Changed && !CFGChanged)
     return PreservedAnalyses::all();
-  // Only metadata and fast-math flags changed.
   PreservedAnalyses PA;
-  PA.preserveSet<CFGAnalyses>();
+  if (!CFGChanged)
+    PA.preserveSet<CFGAnalyses>(); // Only metadata and fast-math flags.
+  PA.preserve<DominatorTreeAnalysis>();
   PA.preserve<LoopAnalysis>();
   PA.preserve<ScalarEvolutionAnalysis>();
   return PA;
