@@ -76,7 +76,7 @@ bool isPureComputation(const llvm::Instruction &I);
 /// opcode-specific discriminator (predicate, cast kind, GEP source type,
 /// intrinsic id) and the operand list, canonicalised for commutative ops.
 using ExprKey =
-    std::tuple<unsigned, llvm::Type *, unsigned, std::vector<llvm::Value *>>;
+    std::tuple<unsigned, llvm::Type *, unsigned, llvm::Type *, std::vector<llvm::Value *>>;
 
 ExprKey makeExprKey(const llvm::Instruction &I);
 

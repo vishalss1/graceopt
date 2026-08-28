@@ -117,19 +117,20 @@ bool isPureComputation(const Instruction &I) {
 
 ExprKey makeExprKey(const Instruction &I) {
   unsigned Extra = 0;
+  Type *SourceType = nullptr;
   if (auto *Cmp = dyn_cast<CmpInst>(&I))
     Extra = Cmp->getPredicate();
   else if (auto *Cast = dyn_cast<CastInst>(&I))
     Extra = Cast->getOpcode();
   else if (auto *GEP = dyn_cast<GetElementPtrInst>(&I))
-    Extra = GEP->getSourceElementType()->getTypeID();
+    SourceType = GEP->getSourceElementType();
   else if (auto *CB = dyn_cast<CallBase>(&I))
     Extra = CB->getCalledFunction() ? CB->getCalledFunction()->getIntrinsicID()
                                     : 0;
   std::vector<Value *> Ops(I.op_begin(), I.op_end());
   if (I.isCommutative() && Ops.size() == 2 && Ops[0] > Ops[1])
     std::swap(Ops[0], Ops[1]);
-  return {I.getOpcode(), I.getType(), Extra, std::move(Ops)};
+  return {I.getOpcode(), I.getType(), Extra, SourceType, std::move(Ops)};
 }
 
 } // namespace graceopt
