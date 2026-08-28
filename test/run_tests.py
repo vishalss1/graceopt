@@ -57,14 +57,14 @@ def run_test(path: Path, tc, tmpdir: Path, verbose: bool) -> tuple[bool, str]:
         "%opt": f'"{tc.opt}" -load-pass-plugin="{tc.plugin}"',
         "%clang": f'"{tc.clang}" -fpass-plugin="{tc.plugin}"',
         "%plugin": str(tc.plugin),
-        "%s": str(path),
-        "%t": str(tmpdir / (path.stem + ".tmp")),
+        "%s": path.as_posix(),
+        "%t": (tmpdir / (path.stem + ".tmp")).as_posix(),
     }
     log = []
     for cmd in runs:
         for k, v in subs.items():
             cmd = cmd.replace(k, v)
-        cmd = re.sub(r"(?<![\w/\\])FileCheck(?![\w])", f'"{tc.filecheck}"', cmd)
+        cmd = re.sub(r"(?<![\w/\\])FileCheck(?![\w])", lambda _: f'"{tc.filecheck}"', cmd)
         if verbose:
             log.append(f"$ {cmd}")
         proc = subprocess.run(cmd, shell=True, capture_output=True, text=True)
