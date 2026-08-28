@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """Minimal lit-style test runner for GraceOpt.
 
-Each `.ll` file under test/ may contain one or more `; RUN:` lines. A RUN line
-is a shell command with the following substitutions:
+Each `.ll` (or `.c`) file under test/ may contain one or more `; RUN:`
+(`// RUN:`) lines. A RUN line is a shell command with these substitutions:
 
   %s        path of the test file
   %t        a per-test temporary file path
   %opt      opt with the GraceOpt plugin loaded
+  %clang    clang with the GraceOpt plugin loaded via -fpass-plugin
   %plugin   path of the plugin library
   FileCheck resolved to the LLVM FileCheck binary
 
@@ -29,7 +30,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 from toolchain import add_toolchain_args, toolchain_from_args  # noqa: E402
 
 TEST_DIR = Path(__file__).resolve().parent
-RUN_RE = re.compile(r"^;\s*RUN:\s*(.*)$")
+RUN_RE = re.compile(r"^(?:;|//)\s*RUN:\s*(.*)$")
 
 
 def collect_run_lines(path: Path) -> list[str]:
@@ -54,6 +55,7 @@ def run_test(path: Path, tc, tmpdir: Path, verbose: bool) -> tuple[bool, str]:
         return False, "no RUN lines"
     subs = {
         "%opt": f'"{tc.opt}" -load-pass-plugin="{tc.plugin}"',
+        "%clang": f'"{tc.clang}" -fpass-plugin="{tc.plugin}"',
         "%plugin": str(tc.plugin),
         "%s": str(path),
         "%t": str(tmpdir / (path.stem + ".tmp")),
@@ -86,7 +88,7 @@ def main() -> int:
     args = ap.parse_args()
     tc = toolchain_from_args(args)
 
-    tests = sorted(p for p in TEST_DIR.rglob("*.ll"))
+    tests = sorted(p for p in TEST_DIR.rglob("*") if p.suffix in (".ll", ".c"))
     if args.filter:
         tests = [t for t in tests if args.filter in str(t)]
     if not tests:
