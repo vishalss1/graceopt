@@ -107,6 +107,6 @@ PreservedAnalyses GraceLICMPass::run(Function &F,
     PA.preserveSet<CFGAnalyses>(); // Instructions moved, no edges touched.
   PA.preserve<DominatorTreeAnalysis>();
   PA.preserve<LoopAnalysis>();
-  PA.preserve<ScalarEvolutionAnalysis>();
+  // Moving instructions can invalidate cached SCEV dispositions.
   return PA;
 }
