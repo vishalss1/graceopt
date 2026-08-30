@@ -37,7 +37,8 @@ Instruction *findDominatingDef(AvailableMap &Avail, const ExprKey &K,
   if (It == Avail.end())
     return nullptr;
   for (Instruction *Def : It->second)
-    if (DT.dominates(Def, I))
+    if (DT.dominates(Def, I) &&
+        (!isa<CallBase>(I) || Def->isSameOperationAs(I)))
       return Def;
   return nullptr;
 }

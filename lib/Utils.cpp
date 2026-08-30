@@ -110,9 +110,24 @@ bool isPureComputation(const Instruction &I) {
     return false;
   if (I.mayReadOrWriteMemory() || I.mayHaveSideEffects())
     return false;
-  if (auto *CB = dyn_cast<CallBase>(&I))
-    return isa<IntrinsicInst>(CB) && CB->doesNotAccessMemory();
-  return true;
+  if (auto *CB = dyn_cast<CallBase>(&I)) {
+    if (!isa<IntrinsicInst>(CB) || CB->isConvergent())
+      return false;
+    // Only deterministic arithmetic intrinsics are supported. Memory-free
+    // alone does not rule out nondeterministic or context-dependent results.
+    switch (cast<IntrinsicInst>(CB)->getIntrinsicID()) {
+    case Intrinsic::sqrt: case Intrinsic::fabs: case Intrinsic::fma:
+    case Intrinsic::fmuladd: case Intrinsic::bswap: case Intrinsic::bitreverse:
+    case Intrinsic::ctpop: case Intrinsic::ctlz: case Intrinsic::cttz:
+      return true;
+    default:
+      return false;
+    }
+  }
+  // Freeze can choose a distinct value on each execution. Aggregate and
+  // vector operations carry indices or masks that are not in ExprKey.
+  return isa<BinaryOperator>(I) || isa<CastInst>(I) || isa<CmpInst>(I) ||
+         isa<GetElementPtrInst>(I) || isa<SelectInst>(I) || isa<UnaryOperator>(I);
 }
 
 ExprKey makeExprKey(const Instruction &I) {
