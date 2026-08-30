@@ -65,7 +65,12 @@ TargetProfile profileTarget(const Function &F) {
   P.IsAArch64 = TT.isAArch64();
   P.CPU = F.getFnAttribute("target-cpu").getValueAsString();
   StringRef Features = F.getFnAttribute("target-features").getValueAsString();
-  P.HasSVE = Features.contains("+sve");
+  SmallVector<StringRef, 16> FeatureList;
+  Features.split(FeatureList, ',');
+  for (StringRef Feature : FeatureList) {
+    if (Feature == "+sve") P.HasSVE = true;
+    if (Feature == "-sve") P.HasSVE = false;
+  }
 
   if (P.IsAArch64) {
     // Number of 128-bit SIMD/FP pipes per core. Interleaving by that factor
@@ -125,6 +130,10 @@ PreservedAnalyses GraceVecHintsPass::run(Function &F,
     if (!R.IsInnermost)
       continue;
     Loop &L = *const_cast<Loop *>(R.L);
+    // An explicit disable pragma also forbids granting reassociation.
+    if (auto Hint = findStringMetadataForLoop(&L, "llvm.loop.vectorize.enable");
+        Hint && *Hint == 0)
+      continue;
 
     // Ordered FP reductions are the one blocker we can lift ourselves.
     bool Candidate = R.isVectorizationCandidate();
@@ -189,6 +198,6 @@ PreservedAnalyses GraceVecHintsPass::run(Function &F,
     PA.preserveSet<CFGAnalyses>(); // Only metadata and fast-math flags.
   PA.preserve<DominatorTreeAnalysis>();
   PA.preserve<LoopAnalysis>();
-  PA.preserve<ScalarEvolutionAnalysis>();
+  // Fast-math changes may alter cached recurrence classification.
   return PA;
 }
