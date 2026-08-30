@@ -69,6 +69,11 @@ unsigned eliminateRedundancies(Function &F, DominatorTree &DT,
   for (DomTreeNode *N : depth_first(DT.getRootNode())) {
     AvailableMemory Mem; // Memory facts do not survive across blocks.
     for (Instruction &I : make_early_inc_range(*N->getBlock())) {
+      if (isa<FenceInst>(I) || (isa<LoadInst>(I) &&
+                               !cast<LoadInst>(I).isSimple())) {
+        Mem.clear(); // Synchronization can make a later plain load observe new data.
+        continue;
+      }
       if (auto *Load = dyn_cast<LoadInst>(&I)) {
         if (Value *V = findAvailableLoad(Mem, *Load)) {
           LLVM_DEBUG(dbgs() << "[grace-rce] forwarding " << *V << " to " << I
@@ -77,6 +82,8 @@ unsigned eliminateRedundancies(Function &F, DominatorTree &DT,
             return OptimizationRemark(DEBUG_TYPE, "LoadForwarded", Load)
                    << "forwarded earlier value to redundant load";
           });
+          if (auto *Earlier = dyn_cast<LoadInst>(V))
+            Earlier->dropPoisonGeneratingMetadata();
           Load->replaceAllUsesWith(V);
           Load->eraseFromParent();
           ++NumRemoved;
