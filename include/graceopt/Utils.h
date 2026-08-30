@@ -37,8 +37,8 @@ struct InvariantInfo {
   /// The instruction may execute unconditionally before the loop: it cannot
   /// trap, has no side effects and any pointer it reads is dereferenceable.
   bool SafeToSpeculate = false;
-  /// The instruction's block dominates every loop exit, so it already runs on
-  /// every trip through the loop body.
+  /// LLVM proves the instruction executes at least once on loop entry,
+  /// including implicit control flow from throwing or nonreturning calls.
   bool GuaranteedToExecute = false;
 };
 
@@ -61,8 +61,7 @@ bool loadMayBeClobberedInLoop(llvm::LoadInst &Load, llvm::Loop &L,
 /// decided to be hoistable), which lets callers discover chains transitively.
 ///
 /// Returns std::nullopt when hoisting is illegal. Non-speculatable
-/// instructions are only accepted when their block dominates all loop exits,
-/// i.e. they are guaranteed to execute whenever the loop body runs.
+/// instructions are only accepted when LLVM must-execute analysis proves execution on loop entry.
 std::optional<InvariantInfo> classifyLoopInvariant(
     llvm::Instruction &I, llvm::Loop &L, llvm::AAResults &AA,
     llvm::DominatorTree &DT,

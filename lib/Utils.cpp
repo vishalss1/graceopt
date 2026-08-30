@@ -6,6 +6,7 @@
 #include "llvm/Analysis/AssumptionCache.h"
 #include "llvm/Analysis/LoopInfo.h"
 #include "llvm/Analysis/MemoryLocation.h"
+#include "llvm/Analysis/MustExecute.h"
 #include "llvm/Analysis/ScalarEvolution.h"
 #include "llvm/Analysis/ValueTracking.h"
 #include "llvm/IR/Dominators.h"
@@ -83,19 +84,15 @@ classifyLoopInvariant(Instruction &I, Loop &L, AAResults &AA,
   }
 
   InvariantInfo Info;
-  Info.SafeToSpeculate = isSafeToSpeculativelyExecute(&I, /*CtxI=*/nullptr,
-                                                      /*AC=*/nullptr, &DT);
-  // Guaranteed to execute on every trip through the body when the block
-  // dominates every loop exit (true for the body of a rotated loop, false for
-  // the body of a loop whose header holds the exit test).
-  SmallVector<BasicBlock *, 4> Exits;
-  L.getExitBlocks(Exits);
-  Info.GuaranteedToExecute = !Exits.empty();
-  for (BasicBlock *E : Exits)
-    if (!DT.dominates(I.getParent(), E)) {
-      Info.GuaranteedToExecute = false;
-      break;
-    }
+  BasicBlock *Preheader = L.getLoopPreheader();
+  if (!Preheader)
+    return std::nullopt;
+  // Facts valid inside the body need not hold at the destination.
+  Info.SafeToSpeculate = isSafeToSpeculativelyExecute(
+      &I, Preheader->getTerminator(), /*AC=*/nullptr, &DT);
+  ICFLoopSafetyInfo Safety;
+  Safety.computeLoopSafetyInfo(&L);
+  Info.GuaranteedToExecute = Safety.isGuaranteedToExecute(I, &DT, &L);
   // Not speculatable (e.g. a division that might trap, or a load from a
   // pointer we cannot prove dereferenceable) and not guaranteed to execute:
   // hoisting could introduce a fault that the original program never had.
