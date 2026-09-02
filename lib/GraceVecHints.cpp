@@ -131,8 +131,8 @@ PreservedAnalyses GraceVecHintsPass::run(Function &F,
       continue;
     Loop &L = *const_cast<Loop *>(R.L);
     // An explicit disable pragma also forbids granting reassociation.
-    if (auto Hint = findStringMetadataForLoop(&L, "llvm.loop.vectorize.enable");
-        Hint && *Hint == 0)
+    if (auto Hint = getOptionalBoolLoopAttribute(&L, "llvm.loop.vectorize.enable");
+        Hint && !*Hint)
       continue;
 
     // Ordered FP reductions are the one blocker we can lift ourselves.
