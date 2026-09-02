@@ -55,7 +55,9 @@ unsigned hoistLoopInvariants(Loop &L, AAResults &AA, DominatorTree &DT,
           Batch.emplace_back(&I, *Info);
         }
       }
-      for (auto &[I, Info] : Batch) {
+      for (auto &Item : Batch) {
+        Instruction *I = Item.first;
+        InvariantInfo Info = Item.second;
         LLVM_DEBUG(dbgs() << "[grace-licm] hoisting " << *I << " out of loop '"
                           << L.getHeader()->getName() << "'\n");
         I->moveBefore(InsertPt->getIterator());
