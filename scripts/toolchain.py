@@ -34,10 +34,7 @@ class Toolchain:
         exe = self.bindir / (name + (".exe" if os.name == "nt" else ""))
         if exe.exists():
             return str(exe)
-        found = shutil.which(name)
-        if found:
-            return found
-        raise FileNotFoundError(f"LLVM tool '{name}' not found in {self.bindir} or PATH")
+        raise FileNotFoundError(f"LLVM tool '{name}' not found in {self.bindir} ")
 
     @property
     def clang(self) -> str:
@@ -91,6 +88,8 @@ def find_toolchain(llvm_bin: str | None = None, plugin: str | None = None,
             sys.exit("error: cannot find LLVM; set GRACEOPT_LLVM_BIN or pass --llvm-bin")
         bindir = Path(clang).resolve().parent
 
+    if not bindir.is_dir():
+        sys.exit(f"error: LLVM binary directory does not exist: {bindir}")
     if plugin:
         plugin_path = Path(plugin)
     else:
@@ -106,7 +105,7 @@ def find_toolchain(llvm_bin: str | None = None, plugin: str | None = None,
     if not plugin_path.exists():
         sys.exit(f"error: plugin not found at {plugin_path}; build the project first "
                  "or pass --plugin")
-    return Toolchain(bindir=bindir, plugin=plugin_path.resolve())
+    return Toolchain(bindir=bindir.resolve(), plugin=plugin_path.resolve())
 
 
 def add_toolchain_args(parser) -> None:
