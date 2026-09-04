@@ -49,9 +49,14 @@ bool simplifyAllLoops(Function &F, FunctionAnalysisManager &FAM) {
 bool loadMayBeClobberedInLoop(LoadInst &Load, Loop &L, AAResults &AA) {
   MemoryLocation Loc = MemoryLocation::get(&Load);
   for (BasicBlock *BB : L.blocks())
-    for (Instruction &I : *BB)
+    for (Instruction &I : *BB) {
+      if (isa<FenceInst>(I) || isa<AtomicRMWInst>(I) || isa<AtomicCmpXchgInst>(I) ||
+          (isa<LoadInst>(I) && !cast<LoadInst>(I).isSimple()) ||
+          (isa<StoreInst>(I) && !cast<StoreInst>(I).isSimple()))
+        return true;
       if (I.mayWriteToMemory() && isModSet(AA.getModRefInfo(&I, Loc)))
         return true;
+    }
   return false;
 }
 
@@ -71,7 +76,7 @@ classifyLoopInvariant(Instruction &I, Loop &L, AAResults &AA,
   // Anything that writes memory, throws, or has other side effects stays put.
   if (I.mayWriteToMemory() || I.mayThrow() || !I.willReturn())
     return std::nullopt;
-  if (isa<AllocaInst>(I) || (isa<CallBase>(I) && !isa<IntrinsicInst>(I)))
+  if (!isa<LoadInst>(I) && !isPureComputation(I))
     return std::nullopt;
   if (auto *Load = dyn_cast<LoadInst>(&I)) {
     if (!Load->isSimple())
