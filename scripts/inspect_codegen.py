@@ -31,6 +31,7 @@ def main():
     ap.add_argument("--levels", nargs="+", choices=["O2", "O3"], default=["O2", "O3"])
     ap.add_argument("--prefer-scalable", action="store_true")
     ap.add_argument("--output", type=Path, default=REPO_ROOT / "bench/out/aarch64")
+    ap.add_argument("--pipelines", nargs="+", choices=["all", "none", "licm", "rce", "vec-hints"], default=["all"])
     args = ap.parse_args()
     tc = toolchain_from_args(args)
     out = args.output.resolve(); out.mkdir(parents=True, exist_ok=True)
@@ -41,13 +42,14 @@ def main():
                 "prefer_scalable": args.prefer_scalable, "artifacts": []}
     for profile in args.profiles:
         for level in args.levels:
-            for variant in ("stock", "grace"):
+            variants = [("stock", None)] + [("grace" if p == "all" else f"grace-{p}", p) for p in args.pipelines]
+            for variant, pipeline in variants:
                 stem = f"{profile}-{level}-{variant}"
                 flags = ["--target=aarch64-unknown-linux-gnu", "-ffreestanding", f"-{level}",
-                         *PROFILES[profile], "-Rpass=grace-.*", "-Rpass=loop-vectorize",
+                         *PROFILES[profile], "-Rpass=(grace-.*|loop-vectorize)",
                          "-Rpass-missed=loop-vectorize"]
-                if variant == "grace":
-                    flags += [f"-fpass-plugin={tc.plugin}"]
+                if pipeline is not None:
+                    flags += [f"-fpass-plugin={tc.plugin}", "-mllvm", f"-grace-pipeline={pipeline}"]
                     if args.prefer_scalable:
                         flags += ["-mllvm", "-grace-prefer-scalable"]
                 assembly, ir = out / f"{stem}.s", out / f"{stem}.ll"
