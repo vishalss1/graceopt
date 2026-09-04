@@ -34,7 +34,7 @@ namespace {
 /// is always the one that executes first.
 void findRedundancies(Loop &L, DominatorTree &DT,
                       std::vector<RedundantPair> &Out) {
-  std::map<ExprKey, const Instruction *> Seen;
+  std::map<ExprKey, SmallVector<const Instruction *, 2>> Seen;
   // Walk the dominator subtree rooted at the header; loop blocks are visited
   // only after every block that dominates them.
   for (DomTreeNode *N : depth_first(DT.getNode(L.getHeader()))) {
@@ -45,15 +45,18 @@ void findRedundancies(Loop &L, DominatorTree &DT,
       if (!isPureComputation(I))
         continue;
       ExprKey K = makeExprKey(I);
-      auto It = Seen.find(K);
-      if (It == Seen.end()) {
-        Seen.emplace(std::move(K), &I);
-        continue;
-      }
-      // Only a dominating original makes the duplicate fully redundant; a
-      // sibling-branch twin would need partial redundancy elimination.
-      if (DT.dominates(It->second, &I))
-        Out.push_back({It->second, &I});
+      auto &Definitions = Seen[K];
+      const Instruction *Original = nullptr;
+      for (const Instruction *Def : Definitions)
+        if (DT.dominates(Def, &I) &&
+            (!isa<CallBase>(I) || Def->isSameOperationAs(&I))) {
+          Original = Def;
+          break;
+        }
+      if (Original)
+        Out.push_back({Original, &I});
+      else
+        Definitions.push_back(&I);
     }
   }
 }
