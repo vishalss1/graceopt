@@ -1,3 +1,4 @@
+; RUN: %opt -passes="grace-vec-hints,grace-vec-hints" -verify-each -S %s | FileCheck %s --check-prefix=V2
 ; RUN: %opt -passes="grace-vec-hints" -S %s | FileCheck %s --check-prefix=V2
 ; RUN: %opt -passes="grace-vec-hints" -grace-interleave=-1 -S %s | FileCheck %s --check-prefix=NOHINT
 ; RUN: %opt -passes="grace-vec-hints" -grace-fp-reassoc -S %s | FileCheck %s --check-prefix=REASSOC

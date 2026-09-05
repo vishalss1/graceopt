@@ -164,20 +164,23 @@ PreservedAnalyses GraceVecHintsPass::run(Function &F,
     if (!Candidate)
       continue;
 
+    bool Hinted = false;
     if (TP.InterleaveCount > 0 && !hasUserHint(L, "llvm.loop.interleave.count")) {
       addStringMetadataToLoop(&L, "llvm.loop.interleave.count",
                               TP.InterleaveCount);
-      Changed = true;
+      Changed = Hinted = true;
     }
     if (PreferScalable && TP.HasSVE &&
         !hasUserHint(L, "llvm.loop.vectorize.scalable.enable")) {
       addStringMetadataToLoop(&L, "llvm.loop.vectorize.scalable.enable", 1);
-      Changed = true;
+      Changed = Hinted = true;
     }
     if (ForceVectorize && !hasUserHint(L, "llvm.loop.vectorize.enable")) {
       addStringMetadataToLoop(&L, "llvm.loop.vectorize.enable", 1);
-      Changed = true;
+      Changed = Hinted = true;
     }
+    if (!Hinted)
+      continue;
     LLVM_DEBUG(dbgs() << "[grace-vec-hints] annotated loop '"
                       << L.getHeader()->getName() << "' interleave="
                       << TP.InterleaveCount << "\n");
