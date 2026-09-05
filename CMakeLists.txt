@@ -11,7 +11,7 @@ endif()
 
 # Locate an installed LLVM. Pass -DLLVM_DIR=<prefix>/lib/cmake/llvm if it is
 # not on the default search path.
-find_package(LLVM 22 REQUIRED CONFIG)
+find_package(LLVM REQUIRED CONFIG)
 if(NOT LLVM_VERSION_MAJOR EQUAL 22)
   message(FATAL_ERROR "GraceOpt currently supports LLVM 22; use a matching LLVM 22 toolchain")
 endif()
