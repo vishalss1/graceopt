@@ -49,6 +49,24 @@ def collect_run_lines(path: Path) -> list[str]:
     return lines
 
 
+def split_pipeline(command: str) -> list[str]:
+    """Split simple RUN pipelines while preserving pipes in quoted arguments."""
+    stages = []
+    quote = None
+    start = 0
+    for i, char in enumerate(command):
+        if char in ('"', "'"):
+            if quote is None:
+                quote = char
+            elif quote == char:
+                quote = None
+        elif char == "|" and quote is None:
+            stages.append(command[start:i].strip())
+            start = i + 1
+    stages.append(command[start:].strip())
+    return stages
+
+
 def run_test(path: Path, tc, tmpdir: Path, verbose: bool) -> tuple[bool, str]:
     runs = collect_run_lines(path)
     if not runs:
@@ -67,15 +85,18 @@ def run_test(path: Path, tc, tmpdir: Path, verbose: bool) -> tuple[bool, str]:
         cmd = re.sub(r"(?<![\w/\\])FileCheck(?![\w])", lambda _: f'"{tc.filecheck}"', cmd)
         if verbose:
             log.append(f"$ {cmd}")
-        proc = subprocess.run(cmd, shell=True, capture_output=True, text=True)
-        if proc.returncode != 0:
-            log.append(f"$ {cmd}")
-            log.append(f"exit code {proc.returncode}")
-            if proc.stdout:
-                log.append(proc.stdout)
-            if proc.stderr:
-                log.append(proc.stderr)
-            return False, "\n".join(log)
+        output = None
+        for stage in split_pipeline(cmd):
+            try:
+                proc = subprocess.run(stage, shell=True, input=output,
+                                      capture_output=True, text=True, timeout=60)
+            except subprocess.TimeoutExpired:
+                return False, f"timed out after 60 seconds: {stage}"
+            output = proc.stdout
+            if proc.returncode != 0:
+                log += [f"$ {stage}", f"exit code {proc.returncode}",
+                        proc.stdout, proc.stderr]
+                return False, "\n".join(log)
     return True, "\n".join(log)
 
 
