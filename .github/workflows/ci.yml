@@ -1,0 +1,37 @@
+name: GraceOpt checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  windows-llvm22:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            git
+            mingw-w64-ucrt-x86_64-clang
+            mingw-w64-ucrt-x86_64-llvm
+            mingw-w64-ucrt-x86_64-cmake
+            mingw-w64-ucrt-x86_64-ninja
+            mingw-w64-ucrt-x86_64-python
+      - name: Configure
+        run: cmake -S . -B build -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DLLVM_DIR=/ucrt64/lib/cmake/llvm
+      - name: Build
+        run: cmake --build build -j 2
+      - name: Verify IR, framework, native checksums and AArch64 codegen
+        run: ctest --test-dir build --output-on-failure
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: verification-artifacts
+          path: |
+            build/Testing/Temporary/LastTest.log
+            build/benchmark-smoke.json
+            build/codegen-smoke/
