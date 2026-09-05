@@ -33,6 +33,7 @@ def build_variant(tc, kernel, variant, output, harness, extra_flags, repeats):
         flags += [f"-fpass-plugin={tc.plugin}", "-mllvm",
                   f"-grace-pipeline={variant.pipeline}"]
     argv = [tc.clang, "-std=c11", *flags, "-c", kernel_source(kernel), "-o", obj]
+    command(argv)  # Warm compiler/filesystem caches consistently before measuring.
     times = [command(argv)[0] for _ in range(repeats)]
     link = [tc.clang, harness, obj, "-o", exe]
     if os.name != "nt":
