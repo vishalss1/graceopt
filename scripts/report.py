@@ -50,6 +50,8 @@ def markdown(data, records):
               "without changing machine code. Interleave hints can increase register pressure or code size.",
               "Inspect assembly and per-pass ablations before attributing a regression to a specific transform.",
               "Checksums passed the recorded tolerance; they detect many errors but are not a proof of equivalence.",
+              "Intervals are per comparison and are not corrected for multiple comparisons; nominal wins need replication.",
+              "Compare native object disassembly before attributing small timing differences to generated code.",
               "These are measurements on the recorded native host, not inferred NVIDIA Grace timings.", ""]
     return "\n".join(lines)
 
