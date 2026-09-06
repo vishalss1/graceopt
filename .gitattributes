@@ -1,2 +1,6 @@
 * text=auto eol=lf
 *.bat text eol=crlf
+
+# Retained compiler outputs must preserve bytes recorded by SHA256 manifests.
+results/recorded/aarch64/*.s -text
+results/recorded/aarch64/*.ll -text
