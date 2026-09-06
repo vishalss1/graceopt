@@ -1,0 +1,456 @@
+{
+  "method": "llvm-objdump -d on kernel objects; discard blank lines and file-format header",
+  "compiler": "clang version 22.1.4 (https://github.com/msys2/MINGW-packages 42681e05ad3617c25e48a935a48eddc72a3ac7e2)",
+  "workloads": [
+    {
+      "kernel": "saxpy",
+      "variants": [
+        {
+          "name": "stock",
+          "object_sha256": "d439032ed3298d3d2b729af43a4a3ab4fe4b6b1b84e71e36a109b6e5e1f913ee",
+          "disassembly_sha256": "5e26926d0c0929467c23e9484da98a49b1a7c3dca243af3beec069bb534b89bf",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\saxpy-stock.o"
+          ]
+        },
+        {
+          "name": "grace",
+          "object_sha256": "d439032ed3298d3d2b729af43a4a3ab4fe4b6b1b84e71e36a109b6e5e1f913ee",
+          "disassembly_sha256": "5e26926d0c0929467c23e9484da98a49b1a7c3dca243af3beec069bb534b89bf",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\saxpy-grace.o"
+          ]
+        },
+        {
+          "name": "licm",
+          "object_sha256": "d439032ed3298d3d2b729af43a4a3ab4fe4b6b1b84e71e36a109b6e5e1f913ee",
+          "disassembly_sha256": "5e26926d0c0929467c23e9484da98a49b1a7c3dca243af3beec069bb534b89bf",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\saxpy-licm.o"
+          ]
+        },
+        {
+          "name": "rce",
+          "object_sha256": "d439032ed3298d3d2b729af43a4a3ab4fe4b6b1b84e71e36a109b6e5e1f913ee",
+          "disassembly_sha256": "5e26926d0c0929467c23e9484da98a49b1a7c3dca243af3beec069bb534b89bf",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\saxpy-rce.o"
+          ]
+        },
+        {
+          "name": "vec",
+          "object_sha256": "d439032ed3298d3d2b729af43a4a3ab4fe4b6b1b84e71e36a109b6e5e1f913ee",
+          "disassembly_sha256": "5e26926d0c0929467c23e9484da98a49b1a7c3dca243af3beec069bb534b89bf",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\saxpy-vec.o"
+          ]
+        },
+        {
+          "name": "stock-o3",
+          "object_sha256": "d439032ed3298d3d2b729af43a4a3ab4fe4b6b1b84e71e36a109b6e5e1f913ee",
+          "disassembly_sha256": "5e26926d0c0929467c23e9484da98a49b1a7c3dca243af3beec069bb534b89bf",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\saxpy-stock-o3.o"
+          ]
+        },
+        {
+          "name": "grace-o3",
+          "object_sha256": "d439032ed3298d3d2b729af43a4a3ab4fe4b6b1b84e71e36a109b6e5e1f913ee",
+          "disassembly_sha256": "5e26926d0c0929467c23e9484da98a49b1a7c3dca243af3beec069bb534b89bf",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\saxpy-grace-o3.o"
+          ]
+        }
+      ]
+    },
+    {
+      "kernel": "dot",
+      "variants": [
+        {
+          "name": "stock",
+          "object_sha256": "f6b9d9f8f58cac411bfac21c04609c278e2a8fe8608567b9b53082c541aca0c2",
+          "disassembly_sha256": "4db71f5b2156f48d328057fd00da039b84880782aba6360f0ed9cf894e4b3a77",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\dot-stock.o"
+          ]
+        },
+        {
+          "name": "grace",
+          "object_sha256": "f6b9d9f8f58cac411bfac21c04609c278e2a8fe8608567b9b53082c541aca0c2",
+          "disassembly_sha256": "4db71f5b2156f48d328057fd00da039b84880782aba6360f0ed9cf894e4b3a77",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\dot-grace.o"
+          ]
+        },
+        {
+          "name": "licm",
+          "object_sha256": "f6b9d9f8f58cac411bfac21c04609c278e2a8fe8608567b9b53082c541aca0c2",
+          "disassembly_sha256": "4db71f5b2156f48d328057fd00da039b84880782aba6360f0ed9cf894e4b3a77",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\dot-licm.o"
+          ]
+        },
+        {
+          "name": "rce",
+          "object_sha256": "f6b9d9f8f58cac411bfac21c04609c278e2a8fe8608567b9b53082c541aca0c2",
+          "disassembly_sha256": "4db71f5b2156f48d328057fd00da039b84880782aba6360f0ed9cf894e4b3a77",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\dot-rce.o"
+          ]
+        },
+        {
+          "name": "vec",
+          "object_sha256": "f6b9d9f8f58cac411bfac21c04609c278e2a8fe8608567b9b53082c541aca0c2",
+          "disassembly_sha256": "4db71f5b2156f48d328057fd00da039b84880782aba6360f0ed9cf894e4b3a77",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\dot-vec.o"
+          ]
+        },
+        {
+          "name": "stock-o3",
+          "object_sha256": "f6b9d9f8f58cac411bfac21c04609c278e2a8fe8608567b9b53082c541aca0c2",
+          "disassembly_sha256": "4db71f5b2156f48d328057fd00da039b84880782aba6360f0ed9cf894e4b3a77",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\dot-stock-o3.o"
+          ]
+        },
+        {
+          "name": "grace-o3",
+          "object_sha256": "f6b9d9f8f58cac411bfac21c04609c278e2a8fe8608567b9b53082c541aca0c2",
+          "disassembly_sha256": "4db71f5b2156f48d328057fd00da039b84880782aba6360f0ed9cf894e4b3a77",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\dot-grace-o3.o"
+          ]
+        }
+      ]
+    },
+    {
+      "kernel": "invariant",
+      "variants": [
+        {
+          "name": "stock",
+          "object_sha256": "e2679d718e1a22f9a4c3dfde6be8436c35fe27433a49354d9cd8fbc8f175e9bd",
+          "disassembly_sha256": "f77f460932e25ebb87eec018bdd63f86f7553b62718678a925221075eef25f56",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\invariant-stock.o"
+          ]
+        },
+        {
+          "name": "grace",
+          "object_sha256": "e2679d718e1a22f9a4c3dfde6be8436c35fe27433a49354d9cd8fbc8f175e9bd",
+          "disassembly_sha256": "f77f460932e25ebb87eec018bdd63f86f7553b62718678a925221075eef25f56",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\invariant-grace.o"
+          ]
+        },
+        {
+          "name": "licm",
+          "object_sha256": "e2679d718e1a22f9a4c3dfde6be8436c35fe27433a49354d9cd8fbc8f175e9bd",
+          "disassembly_sha256": "f77f460932e25ebb87eec018bdd63f86f7553b62718678a925221075eef25f56",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\invariant-licm.o"
+          ]
+        },
+        {
+          "name": "rce",
+          "object_sha256": "e2679d718e1a22f9a4c3dfde6be8436c35fe27433a49354d9cd8fbc8f175e9bd",
+          "disassembly_sha256": "f77f460932e25ebb87eec018bdd63f86f7553b62718678a925221075eef25f56",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\invariant-rce.o"
+          ]
+        },
+        {
+          "name": "vec",
+          "object_sha256": "e2679d718e1a22f9a4c3dfde6be8436c35fe27433a49354d9cd8fbc8f175e9bd",
+          "disassembly_sha256": "f77f460932e25ebb87eec018bdd63f86f7553b62718678a925221075eef25f56",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\invariant-vec.o"
+          ]
+        },
+        {
+          "name": "stock-o3",
+          "object_sha256": "e2679d718e1a22f9a4c3dfde6be8436c35fe27433a49354d9cd8fbc8f175e9bd",
+          "disassembly_sha256": "f77f460932e25ebb87eec018bdd63f86f7553b62718678a925221075eef25f56",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\invariant-stock-o3.o"
+          ]
+        },
+        {
+          "name": "grace-o3",
+          "object_sha256": "e2679d718e1a22f9a4c3dfde6be8436c35fe27433a49354d9cd8fbc8f175e9bd",
+          "disassembly_sha256": "f77f460932e25ebb87eec018bdd63f86f7553b62718678a925221075eef25f56",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\invariant-grace-o3.o"
+          ]
+        }
+      ]
+    },
+    {
+      "kernel": "redundant",
+      "variants": [
+        {
+          "name": "stock",
+          "object_sha256": "4053cabdbb254346f4f06007345f2005f4767e19aa5c88ccea9544fbf97f7a50",
+          "disassembly_sha256": "00eedf0651f9f89a38e92d37803426b3c4b439af8cc20b6fdab618c469194492",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\redundant-stock.o"
+          ]
+        },
+        {
+          "name": "grace",
+          "object_sha256": "4053cabdbb254346f4f06007345f2005f4767e19aa5c88ccea9544fbf97f7a50",
+          "disassembly_sha256": "00eedf0651f9f89a38e92d37803426b3c4b439af8cc20b6fdab618c469194492",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\redundant-grace.o"
+          ]
+        },
+        {
+          "name": "licm",
+          "object_sha256": "4053cabdbb254346f4f06007345f2005f4767e19aa5c88ccea9544fbf97f7a50",
+          "disassembly_sha256": "00eedf0651f9f89a38e92d37803426b3c4b439af8cc20b6fdab618c469194492",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\redundant-licm.o"
+          ]
+        },
+        {
+          "name": "rce",
+          "object_sha256": "4053cabdbb254346f4f06007345f2005f4767e19aa5c88ccea9544fbf97f7a50",
+          "disassembly_sha256": "00eedf0651f9f89a38e92d37803426b3c4b439af8cc20b6fdab618c469194492",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\redundant-rce.o"
+          ]
+        },
+        {
+          "name": "vec",
+          "object_sha256": "4053cabdbb254346f4f06007345f2005f4767e19aa5c88ccea9544fbf97f7a50",
+          "disassembly_sha256": "00eedf0651f9f89a38e92d37803426b3c4b439af8cc20b6fdab618c469194492",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\redundant-vec.o"
+          ]
+        },
+        {
+          "name": "stock-o3",
+          "object_sha256": "4053cabdbb254346f4f06007345f2005f4767e19aa5c88ccea9544fbf97f7a50",
+          "disassembly_sha256": "00eedf0651f9f89a38e92d37803426b3c4b439af8cc20b6fdab618c469194492",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\redundant-stock-o3.o"
+          ]
+        },
+        {
+          "name": "grace-o3",
+          "object_sha256": "4053cabdbb254346f4f06007345f2005f4767e19aa5c88ccea9544fbf97f7a50",
+          "disassembly_sha256": "00eedf0651f9f89a38e92d37803426b3c4b439af8cc20b6fdab618c469194492",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\redundant-grace-o3.o"
+          ]
+        }
+      ]
+    },
+    {
+      "kernel": "stencil",
+      "variants": [
+        {
+          "name": "stock",
+          "object_sha256": "382cc533d6a154983e59f8b687868228995a361b13906db31eb93cf7f2c14828",
+          "disassembly_sha256": "f641c658d2d768b92b0247a64798d83ff8d20fefceb47a38b1cb74c105337178",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\stencil-stock.o"
+          ]
+        },
+        {
+          "name": "grace",
+          "object_sha256": "382cc533d6a154983e59f8b687868228995a361b13906db31eb93cf7f2c14828",
+          "disassembly_sha256": "f641c658d2d768b92b0247a64798d83ff8d20fefceb47a38b1cb74c105337178",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\stencil-grace.o"
+          ]
+        },
+        {
+          "name": "licm",
+          "object_sha256": "382cc533d6a154983e59f8b687868228995a361b13906db31eb93cf7f2c14828",
+          "disassembly_sha256": "f641c658d2d768b92b0247a64798d83ff8d20fefceb47a38b1cb74c105337178",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\stencil-licm.o"
+          ]
+        },
+        {
+          "name": "rce",
+          "object_sha256": "382cc533d6a154983e59f8b687868228995a361b13906db31eb93cf7f2c14828",
+          "disassembly_sha256": "f641c658d2d768b92b0247a64798d83ff8d20fefceb47a38b1cb74c105337178",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\stencil-rce.o"
+          ]
+        },
+        {
+          "name": "vec",
+          "object_sha256": "382cc533d6a154983e59f8b687868228995a361b13906db31eb93cf7f2c14828",
+          "disassembly_sha256": "f641c658d2d768b92b0247a64798d83ff8d20fefceb47a38b1cb74c105337178",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\stencil-vec.o"
+          ]
+        },
+        {
+          "name": "stock-o3",
+          "object_sha256": "e2e57e499fb2b20ed59989a8192c7d58c894239ccdd774bf777913668bf318da",
+          "disassembly_sha256": "11c69882729d9d8af649c474c7faa44e64320cc16584533d68f6cd0af34cb019",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\stencil-stock-o3.o"
+          ]
+        },
+        {
+          "name": "grace-o3",
+          "object_sha256": "e2e57e499fb2b20ed59989a8192c7d58c894239ccdd774bf777913668bf318da",
+          "disassembly_sha256": "11c69882729d9d8af649c474c7faa44e64320cc16584533d68f6cd0af34cb019",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\stencil-grace-o3.o"
+          ]
+        }
+      ]
+    },
+    {
+      "kernel": "matmul",
+      "variants": [
+        {
+          "name": "stock",
+          "object_sha256": "3dde861a090a76e181a170f9916ccd033db9ac3a89a79c4d6d38106e09c118a4",
+          "disassembly_sha256": "eb8b04d53aa5ed482196cbc6fe770dc61df859ea9769e89dd545d0ca4a983007",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\matmul-stock.o"
+          ]
+        },
+        {
+          "name": "grace",
+          "object_sha256": "3dde861a090a76e181a170f9916ccd033db9ac3a89a79c4d6d38106e09c118a4",
+          "disassembly_sha256": "eb8b04d53aa5ed482196cbc6fe770dc61df859ea9769e89dd545d0ca4a983007",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\matmul-grace.o"
+          ]
+        },
+        {
+          "name": "licm",
+          "object_sha256": "3dde861a090a76e181a170f9916ccd033db9ac3a89a79c4d6d38106e09c118a4",
+          "disassembly_sha256": "eb8b04d53aa5ed482196cbc6fe770dc61df859ea9769e89dd545d0ca4a983007",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\matmul-licm.o"
+          ]
+        },
+        {
+          "name": "rce",
+          "object_sha256": "3dde861a090a76e181a170f9916ccd033db9ac3a89a79c4d6d38106e09c118a4",
+          "disassembly_sha256": "eb8b04d53aa5ed482196cbc6fe770dc61df859ea9769e89dd545d0ca4a983007",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\matmul-rce.o"
+          ]
+        },
+        {
+          "name": "vec",
+          "object_sha256": "3dde861a090a76e181a170f9916ccd033db9ac3a89a79c4d6d38106e09c118a4",
+          "disassembly_sha256": "eb8b04d53aa5ed482196cbc6fe770dc61df859ea9769e89dd545d0ca4a983007",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\matmul-vec.o"
+          ]
+        },
+        {
+          "name": "stock-o3",
+          "object_sha256": "3dde861a090a76e181a170f9916ccd033db9ac3a89a79c4d6d38106e09c118a4",
+          "disassembly_sha256": "eb8b04d53aa5ed482196cbc6fe770dc61df859ea9769e89dd545d0ca4a983007",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\matmul-stock-o3.o"
+          ]
+        },
+        {
+          "name": "grace-o3",
+          "object_sha256": "3dde861a090a76e181a170f9916ccd033db9ac3a89a79c4d6d38106e09c118a4",
+          "disassembly_sha256": "eb8b04d53aa5ed482196cbc6fe770dc61df859ea9769e89dd545d0ca4a983007",
+          "command": [
+            "C:\\msys64\\ucrt64\\bin\\llvm-objdump.exe",
+            "-d",
+            "D:\\graceopt\\bench\\out\\native\\matmul-grace-o3.o"
+          ]
+        }
+      ]
+    }
+  ]
+}

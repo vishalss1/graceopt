@@ -1,0 +1,2807 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-10-13T12:38:35.816956+00:00",
+  "host": {
+    "platform": "Windows-11-10.0.26300-SP0",
+    "machine": "AMD64",
+    "processor": "AMD64 Family 25 Model 68 Stepping 1, AuthenticAMD",
+    "cpu_count": 16,
+    "cpu_affinity": null,
+    "processor_identifier": "AMD64 Family 25 Model 68 Stepping 1, AuthenticAMD"
+  },
+  "compiler": "clang version 22.1.4 (https://github.com/msys2/MINGW-packages 42681e05ad3617c25e48a935a48eddc72a3ac7e2)",
+  "plugin_sha256": "c062d736b729e299b18b5e1618f0ec92094bf94ed6fb506a527647f913e2480e",
+  "git_revision": "58de8dd61d4242d9d2dd9b23fa748d81bbf87c5f",
+  "git_dirty": false,
+  "config": {
+    "llvm_bin": "C:/msys64/ucrt64/bin",
+    "plugin": "build/lib/GraceOpt.dll",
+    "build_dir": null,
+    "kernels": [
+      "saxpy",
+      "dot",
+      "invariant",
+      "redundant",
+      "stencil",
+      "matmul"
+    ],
+    "variants": [
+      "stock",
+      "grace",
+      "stock-o3",
+      "grace-o3"
+    ],
+    "samples": 9,
+    "compile_repeats": 5,
+    "size": null,
+    "warmups": 2,
+    "target_seconds": 0.05,
+    "timeout": 120,
+    "seed": 42,
+    "cflag": [],
+    "cpu": null,
+    "output": "results\\clean-local.json",
+    "artifact_dir": "D:\\graceopt\\bench\\out\\native"
+  },
+  "harness_command": [
+    "C:\\msys64\\ucrt64\\bin\\clang.exe",
+    "-std=c11",
+    "-O2",
+    "-c",
+    "D:\\graceopt\\bench\\harness\\main.c",
+    "-o",
+    "D:\\graceopt\\bench\\out\\native\\harness.o"
+  ],
+  "source_sha256": {
+    "bench/codegen/kernels.c": "ad6744439e819a36515713aad92a38c56d2df604f9228198487a2994bb7cec32",
+    "bench/harness/bench.h": "237ed8d067ba6146ce8597c82d9d9e0e510ce0e8ae8f7fa05aab814eb48e9298",
+    "bench/harness/clock.h": "c5e152806c2b437aa5200c56111332504a5e2a600eb3a055044033bd9f33de5b",
+    "bench/harness/data.h": "7112381e3c65a84bb0bc444014e35e41e482c682ecdfbd88ed2700e8204cef10",
+    "bench/harness/main.c": "b8f3eff9132fbee4239359ab50d920fdc764ffefaadd4df87ede5afb2290cb17",
+    "bench/kernels/dot.c": "024f6d338582a440134e0e2fb88f7e1fecf7fde57b9b2a791dbec8e6f13bb965",
+    "bench/kernels/invariant.c": "607c744f04873c03fe33cd635b0d1d931d3ef00db1a8d01e54d21b31bff514dd",
+    "bench/kernels/matmul.c": "ea99f8c6ab9aa1066dd4b5b43ef0d45f5583c7545036ac97af41e7e5a026663f",
+    "bench/kernels/redundant.c": "8a2bd2b2a7e4dc8ef11aba5bda2db0eb5fad50c16cf48fbb7135e5bfb22f0387",
+    "bench/kernels/saxpy.c": "b694c76f754981717e48a56d1641d89f5e0bff513506c8a3685daaaa65127827",
+    "bench/kernels/stencil.c": "f478a3516c1f226dfb316f802d970b027d27ada7e8c3a05fd47bcb507ea4c6e1"
+  },
+  "workloads": [
+    {
+      "name": "saxpy",
+      "size": 262144,
+      "builds": [
+        {
+          "name": "stock",
+          "compile_seconds": [
+            0.16715759999351576,
+            0.1434298999956809,
+            0.15724529999715742,
+            0.14589150001120288,
+            0.14615790000243578
+          ],
+          "link_seconds": 0.14859659998910502,
+          "binary_bytes": 263068,
+          "object_bytes": 3821,
+          "executable": "D:\\graceopt\\bench\\out\\native\\saxpy-stock.exe",
+          "compile_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "-std=c11",
+            "-O2",
+            "-c",
+            "D:\\graceopt\\bench\\kernels\\saxpy.c",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\saxpy-stock.o"
+          ],
+          "link_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "D:\\graceopt\\bench\\out\\native\\harness.o",
+            "D:\\graceopt\\bench\\out\\native\\saxpy-stock.o",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\saxpy-stock.exe"
+          ]
+        },
+        {
+          "name": "grace",
+          "compile_seconds": [
+            0.16347089999180753,
+            0.1523629000002984,
+            0.1623286999965785,
+            0.16755869999178685,
+            0.18229959999735001
+          ],
+          "link_seconds": 0.18608519999543205,
+          "binary_bytes": 263068,
+          "object_bytes": 3821,
+          "executable": "D:\\graceopt\\bench\\out\\native\\saxpy-grace.exe",
+          "compile_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "-std=c11",
+            "-O2",
+            "-fpass-plugin=D:\\graceopt\\build\\lib\\GraceOpt.dll",
+            "-mllvm",
+            "-grace-pipeline=all",
+            "-c",
+            "D:\\graceopt\\bench\\kernels\\saxpy.c",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\saxpy-grace.o"
+          ],
+          "link_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "D:\\graceopt\\bench\\out\\native\\harness.o",
+            "D:\\graceopt\\bench\\out\\native\\saxpy-grace.o",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\saxpy-grace.exe"
+          ]
+        },
+        {
+          "name": "stock-o3",
+          "compile_seconds": [
+            0.1524277999997139,
+            0.16433509999478702,
+            0.152680799990776,
+            0.21470850000332575,
+            0.14921099999628495
+          ],
+          "link_seconds": 0.16913470000145026,
+          "binary_bytes": 263068,
+          "object_bytes": 3821,
+          "executable": "D:\\graceopt\\bench\\out\\native\\saxpy-stock-o3.exe",
+          "compile_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "-std=c11",
+            "-O3",
+            "-c",
+            "D:\\graceopt\\bench\\kernels\\saxpy.c",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\saxpy-stock-o3.o"
+          ],
+          "link_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "D:\\graceopt\\bench\\out\\native\\harness.o",
+            "D:\\graceopt\\bench\\out\\native\\saxpy-stock-o3.o",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\saxpy-stock-o3.exe"
+          ]
+        },
+        {
+          "name": "grace-o3",
+          "compile_seconds": [
+            0.16925659999833442,
+            0.15201240000897087,
+            0.18131390000053216,
+            0.15121320000616834,
+            0.14934309999807738
+          ],
+          "link_seconds": 0.17370189999928698,
+          "binary_bytes": 263068,
+          "object_bytes": 3821,
+          "executable": "D:\\graceopt\\bench\\out\\native\\saxpy-grace-o3.exe",
+          "compile_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "-std=c11",
+            "-O3",
+            "-fpass-plugin=D:\\graceopt\\build\\lib\\GraceOpt.dll",
+            "-mllvm",
+            "-grace-pipeline=all",
+            "-c",
+            "D:\\graceopt\\bench\\kernels\\saxpy.c",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\saxpy-grace-o3.o"
+          ],
+          "link_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "D:\\graceopt\\bench\\out\\native\\harness.o",
+            "D:\\graceopt\\bench\\out\\native\\saxpy-grace-o3.o",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\saxpy-grace-o3.exe"
+          ]
+        }
+      ],
+      "repetitions": 136,
+      "samples": {
+        "stock": [
+          {
+            "kernel": "saxpy",
+            "size": 262144,
+            "repetitions": 136,
+            "seconds": 0.00037646838234864203,
+            "checksum": 295072.78590095043
+          },
+          {
+            "kernel": "saxpy",
+            "size": 262144,
+            "repetitions": 136,
+            "seconds": 0.00039440294120354606,
+            "checksum": 295072.78590095043
+          },
+          {
+            "kernel": "saxpy",
+            "size": 262144,
+            "repetitions": 136,
+            "seconds": 0.000388930147036102,
+            "checksum": 295072.78590095043
+          },
+          {
+            "kernel": "saxpy",
+            "size": 262144,
+            "repetitions": 136,
+            "seconds": 0.0003868036764127764,
+            "checksum": 295072.78590095043
+          },
+          {
+            "kernel": "saxpy",
+            "size": 262144,
+            "repetitions": 136,
+            "seconds": 0.0003787794118098271,
+            "checksum": 295072.78590095043
+          },
+          {
+            "kernel": "saxpy",
+            "size": 262144,
+            "repetitions": 136,
+            "seconds": 0.00039600514698095676,
+            "checksum": 295072.78590095043
+          },
+          {
+            "kernel": "saxpy",
+            "size": 262144,
+            "repetitions": 136,
+            "seconds": 0.0003992948528748992,
+            "checksum": 295072.78590095043
+          },
+          {
+            "kernel": "saxpy",
+            "size": 262144,
+            "repetitions": 136,
+            "seconds": 0.0003927301470813451,
+            "checksum": 295072.78590095043
+          },
+          {
+            "kernel": "saxpy",
+            "size": 262144,
+            "repetitions": 136,
+            "seconds": 0.0003743058823602041,
+            "checksum": 295072.78590095043
+          }
+        ],
+        "grace": [
+          {
+            "kernel": "saxpy",
+            "size": 262144,
+            "repetitions": 136,
+            "seconds": 0.0003739735294563134,
+            "checksum": 295072.78590095043
+          },
+          {
+            "kernel": "saxpy",
+            "size": 262144,
+            "repetitions": 136,
+            "seconds": 0.00038343749999031015,
+            "checksum": 295072.78590095043
+          },
+          {
+            "kernel": "saxpy",
+            "size": 262144,
+            "repetitions": 136,
+            "seconds": 0.00038307941181033934,
+            "checksum": 295072.78590095043
+          },
+          {
+            "kernel": "saxpy",
+            "size": 262144,
+            "repetitions": 136,
+            "seconds": 0.0004757867646891528,
+            "checksum": 295072.78590095043
+          },
+          {
+            "kernel": "saxpy",
+            "size": 262144,
+            "repetitions": 136,
+            "seconds": 0.0003861698529790909,
+            "checksum": 295072.78590095043
+          },
+          {
+            "kernel": "saxpy",
+            "size": 262144,
+            "repetitions": 136,
+            "seconds": 0.00039423014705415187,
+            "checksum": 295072.78590095043
+          },
+          {
+            "kernel": "saxpy",
+            "size": 262144,
+            "repetitions": 136,
+            "seconds": 0.0003848470588469782,
+            "checksum": 295072.78590095043
+          },
+          {
+            "kernel": "saxpy",
+            "size": 262144,
+            "repetitions": 136,
+            "seconds": 0.0003943529411438195,
+            "checksum": 295072.78590095043
+          },
+          {
+            "kernel": "saxpy",
+            "size": 262144,
+            "repetitions": 136,
+            "seconds": 0.00037877500001152787,
+            "checksum": 295072.78590095043
+          }
+        ],
+        "stock-o3": [
+          {
+            "kernel": "saxpy",
+            "size": 262144,
+            "repetitions": 136,
+            "seconds": 0.0003814926470059778,
+            "checksum": 295072.78590095043
+          },
+          {
+            "kernel": "saxpy",
+            "size": 262144,
+            "repetitions": 136,
+            "seconds": 0.00038927794112704066,
+            "checksum": 295072.78590095043
+          },
+          {
+            "kernel": "saxpy",
+            "size": 262144,
+            "repetitions": 136,
+            "seconds": 0.0003753632353276343,
+            "checksum": 295072.78590095043
+          },
+          {
+            "kernel": "saxpy",
+            "size": 262144,
+            "repetitions": 136,
+            "seconds": 0.00038280367644962524,
+            "checksum": 295072.78590095043
+          },
+          {
+            "kernel": "saxpy",
+            "size": 262144,
+            "repetitions": 136,
+            "seconds": 0.0004021705882384113,
+            "checksum": 295072.78590095043
+          },
+          {
+            "kernel": "saxpy",
+            "size": 262144,
+            "repetitions": 136,
+            "seconds": 0.0003740647058721687,
+            "checksum": 295072.78590095043
+          },
+          {
+            "kernel": "saxpy",
+            "size": 262144,
+            "repetitions": 136,
+            "seconds": 0.00037949852947563427,
+            "checksum": 295072.78590095043
+          },
+          {
+            "kernel": "saxpy",
+            "size": 262144,
+            "repetitions": 136,
+            "seconds": 0.00037535882352933506,
+            "checksum": 295072.78590095043
+          },
+          {
+            "kernel": "saxpy",
+            "size": 262144,
+            "repetitions": 136,
+            "seconds": 0.0003833022058054613,
+            "checksum": 295072.78590095043
+          }
+        ],
+        "grace-o3": [
+          {
+            "kernel": "saxpy",
+            "size": 262144,
+            "repetitions": 136,
+            "seconds": 0.0003954933823372224,
+            "checksum": 295072.78590095043
+          },
+          {
+            "kernel": "saxpy",
+            "size": 262144,
+            "repetitions": 136,
+            "seconds": 0.0003773448529767955,
+            "checksum": 295072.78590095043
+          },
+          {
+            "kernel": "saxpy",
+            "size": 262144,
+            "repetitions": 136,
+            "seconds": 0.0003778382353416151,
+            "checksum": 295072.78590095043
+          },
+          {
+            "kernel": "saxpy",
+            "size": 262144,
+            "repetitions": 136,
+            "seconds": 0.00039680882347216964,
+            "checksum": 295072.78590095043
+          },
+          {
+            "kernel": "saxpy",
+            "size": 262144,
+            "repetitions": 136,
+            "seconds": 0.0004051816176797729,
+            "checksum": 295072.78590095043
+          },
+          {
+            "kernel": "saxpy",
+            "size": 262144,
+            "repetitions": 136,
+            "seconds": 0.00038034852942099166,
+            "checksum": 295072.78590095043
+          },
+          {
+            "kernel": "saxpy",
+            "size": 262144,
+            "repetitions": 136,
+            "seconds": 0.0003955875000589431,
+            "checksum": 295072.78590095043
+          },
+          {
+            "kernel": "saxpy",
+            "size": 262144,
+            "repetitions": 136,
+            "seconds": 0.00038133529415063094,
+            "checksum": 295072.78590095043
+          },
+          {
+            "kernel": "saxpy",
+            "size": 262144,
+            "repetitions": 136,
+            "seconds": 0.0003911125000098871,
+            "checksum": 295072.78590095043
+          }
+        ]
+      },
+      "execution_order": [
+        [
+          "stock-o3",
+          "grace",
+          "grace-o3",
+          "stock"
+        ],
+        [
+          "grace-o3",
+          "stock-o3",
+          "stock",
+          "grace"
+        ],
+        [
+          "grace",
+          "grace-o3",
+          "stock-o3",
+          "stock"
+        ],
+        [
+          "grace",
+          "stock-o3",
+          "stock",
+          "grace-o3"
+        ],
+        [
+          "grace",
+          "stock-o3",
+          "grace-o3",
+          "stock"
+        ],
+        [
+          "grace",
+          "grace-o3",
+          "stock-o3",
+          "stock"
+        ],
+        [
+          "stock-o3",
+          "grace",
+          "stock",
+          "grace-o3"
+        ],
+        [
+          "grace",
+          "grace-o3",
+          "stock",
+          "stock-o3"
+        ],
+        [
+          "stock",
+          "stock-o3",
+          "grace",
+          "grace-o3"
+        ]
+      ],
+      "reference_checksum": 295072.78590095043,
+      "tolerance": {
+        "relative": 1e-09,
+        "absolute": 1e-07
+      }
+    },
+    {
+      "name": "dot",
+      "size": 262144,
+      "builds": [
+        {
+          "name": "stock",
+          "compile_seconds": [
+            0.13965459998871665,
+            0.16531090000353288,
+            0.17064050000044517,
+            0.16487579999375157,
+            0.16296200000215322
+          ],
+          "link_seconds": 0.23847130000649486,
+          "binary_bytes": 263068,
+          "object_bytes": 3575,
+          "executable": "D:\\graceopt\\bench\\out\\native\\dot-stock.exe",
+          "compile_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "-std=c11",
+            "-O2",
+            "-c",
+            "D:\\graceopt\\bench\\kernels\\dot.c",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\dot-stock.o"
+          ],
+          "link_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "D:\\graceopt\\bench\\out\\native\\harness.o",
+            "D:\\graceopt\\bench\\out\\native\\dot-stock.o",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\dot-stock.exe"
+          ]
+        },
+        {
+          "name": "grace",
+          "compile_seconds": [
+            0.15970380000362638,
+            0.1515571999916574,
+            0.15067190000263508,
+            0.1666776999918511,
+            0.16259559999161866
+          ],
+          "link_seconds": 0.164309100000537,
+          "binary_bytes": 263068,
+          "object_bytes": 3575,
+          "executable": "D:\\graceopt\\bench\\out\\native\\dot-grace.exe",
+          "compile_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "-std=c11",
+            "-O2",
+            "-fpass-plugin=D:\\graceopt\\build\\lib\\GraceOpt.dll",
+            "-mllvm",
+            "-grace-pipeline=all",
+            "-c",
+            "D:\\graceopt\\bench\\kernels\\dot.c",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\dot-grace.o"
+          ],
+          "link_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "D:\\graceopt\\bench\\out\\native\\harness.o",
+            "D:\\graceopt\\bench\\out\\native\\dot-grace.o",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\dot-grace.exe"
+          ]
+        },
+        {
+          "name": "stock-o3",
+          "compile_seconds": [
+            0.15131770000152756,
+            0.14042580001114402,
+            0.1435866999963764,
+            0.13512429999536835,
+            0.13950149998709094
+          ],
+          "link_seconds": 0.15665819999412633,
+          "binary_bytes": 263068,
+          "object_bytes": 3575,
+          "executable": "D:\\graceopt\\bench\\out\\native\\dot-stock-o3.exe",
+          "compile_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "-std=c11",
+            "-O3",
+            "-c",
+            "D:\\graceopt\\bench\\kernels\\dot.c",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\dot-stock-o3.o"
+          ],
+          "link_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "D:\\graceopt\\bench\\out\\native\\harness.o",
+            "D:\\graceopt\\bench\\out\\native\\dot-stock-o3.o",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\dot-stock-o3.exe"
+          ]
+        },
+        {
+          "name": "grace-o3",
+          "compile_seconds": [
+            0.14121259999228641,
+            0.13602309999987483,
+            0.17597069998737425,
+            0.1503177999984473,
+            0.14406639999651816
+          ],
+          "link_seconds": 0.1855892000021413,
+          "binary_bytes": 263068,
+          "object_bytes": 3575,
+          "executable": "D:\\graceopt\\bench\\out\\native\\dot-grace-o3.exe",
+          "compile_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "-std=c11",
+            "-O3",
+            "-fpass-plugin=D:\\graceopt\\build\\lib\\GraceOpt.dll",
+            "-mllvm",
+            "-grace-pipeline=all",
+            "-c",
+            "D:\\graceopt\\bench\\kernels\\dot.c",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\dot-grace-o3.o"
+          ],
+          "link_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "D:\\graceopt\\bench\\out\\native\\harness.o",
+            "D:\\graceopt\\bench\\out\\native\\dot-grace-o3.o",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\dot-grace-o3.exe"
+          ]
+        }
+      ],
+      "repetitions": 157,
+      "samples": {
+        "stock": [
+          {
+            "kernel": "dot",
+            "size": 262144,
+            "repetitions": 157,
+            "seconds": 0.000327388535010492,
+            "checksum": 65660.53164940393
+          },
+          {
+            "kernel": "dot",
+            "size": 262144,
+            "repetitions": 157,
+            "seconds": 0.0003283713376268175,
+            "checksum": 65660.53164940393
+          },
+          {
+            "kernel": "dot",
+            "size": 262144,
+            "repetitions": 157,
+            "seconds": 0.0003318363057477637,
+            "checksum": 65660.53164940393
+          },
+          {
+            "kernel": "dot",
+            "size": 262144,
+            "repetitions": 157,
+            "seconds": 0.0003282560509589507,
+            "checksum": 65660.53164940393
+          },
+          {
+            "kernel": "dot",
+            "size": 262144,
+            "repetitions": 157,
+            "seconds": 0.0003262369426903107,
+            "checksum": 65660.53164940393
+          },
+          {
+            "kernel": "dot",
+            "size": 262144,
+            "repetitions": 157,
+            "seconds": 0.00032906624200089484,
+            "checksum": 65660.53164940393
+          },
+          {
+            "kernel": "dot",
+            "size": 262144,
+            "repetitions": 157,
+            "seconds": 0.0003228828026045553,
+            "checksum": 65660.53164940393
+          },
+          {
+            "kernel": "dot",
+            "size": 262144,
+            "repetitions": 157,
+            "seconds": 0.00033215159236284415,
+            "checksum": 65660.53164940393
+          },
+          {
+            "kernel": "dot",
+            "size": 262144,
+            "repetitions": 157,
+            "seconds": 0.0003424254777154642,
+            "checksum": 65660.53164940393
+          }
+        ],
+        "grace": [
+          {
+            "kernel": "dot",
+            "size": 262144,
+            "repetitions": 157,
+            "seconds": 0.00033620509554804036,
+            "checksum": 65660.53164940393
+          },
+          {
+            "kernel": "dot",
+            "size": 262144,
+            "repetitions": 157,
+            "seconds": 0.0003355038216060241,
+            "checksum": 65660.53164940393
+          },
+          {
+            "kernel": "dot",
+            "size": 262144,
+            "repetitions": 157,
+            "seconds": 0.0003269133757715333,
+            "checksum": 65660.53164940393
+          },
+          {
+            "kernel": "dot",
+            "size": 262144,
+            "repetitions": 157,
+            "seconds": 0.0003252745223021028,
+            "checksum": 65660.53164940393
+          },
+          {
+            "kernel": "dot",
+            "size": 262144,
+            "repetitions": 157,
+            "seconds": 0.00032964777073505555,
+            "checksum": 65660.53164940393
+          },
+          {
+            "kernel": "dot",
+            "size": 262144,
+            "repetitions": 157,
+            "seconds": 0.0003267636942153702,
+            "checksum": 65660.53164940393
+          },
+          {
+            "kernel": "dot",
+            "size": 262144,
+            "repetitions": 157,
+            "seconds": 0.00032694076432974024,
+            "checksum": 65660.53164940393
+          },
+          {
+            "kernel": "dot",
+            "size": 262144,
+            "repetitions": 157,
+            "seconds": 0.00032960764331903285,
+            "checksum": 65660.53164940393
+          },
+          {
+            "kernel": "dot",
+            "size": 262144,
+            "repetitions": 157,
+            "seconds": 0.00032257707001697746,
+            "checksum": 65660.53164940393
+          }
+        ],
+        "stock-o3": [
+          {
+            "kernel": "dot",
+            "size": 262144,
+            "repetitions": 157,
+            "seconds": 0.00034014777069804586,
+            "checksum": 65660.53164940393
+          },
+          {
+            "kernel": "dot",
+            "size": 262144,
+            "repetitions": 157,
+            "seconds": 0.0003251076432554478,
+            "checksum": 65660.53164940393
+          },
+          {
+            "kernel": "dot",
+            "size": 262144,
+            "repetitions": 157,
+            "seconds": 0.00033673121012557465,
+            "checksum": 65660.53164940393
+          },
+          {
+            "kernel": "dot",
+            "size": 262144,
+            "repetitions": 157,
+            "seconds": 0.0003314796179142976,
+            "checksum": 65660.53164940393
+          },
+          {
+            "kernel": "dot",
+            "size": 262144,
+            "repetitions": 157,
+            "seconds": 0.0003348713376259752,
+            "checksum": 65660.53164940393
+          },
+          {
+            "kernel": "dot",
+            "size": 262144,
+            "repetitions": 157,
+            "seconds": 0.0003249694267547375,
+            "checksum": 65660.53164940393
+          },
+          {
+            "kernel": "dot",
+            "size": 262144,
+            "repetitions": 157,
+            "seconds": 0.00034709490443043007,
+            "checksum": 65660.53164940393
+          },
+          {
+            "kernel": "dot",
+            "size": 262144,
+            "repetitions": 157,
+            "seconds": 0.0003253955414050087,
+            "checksum": 65660.53164940393
+          },
+          {
+            "kernel": "dot",
+            "size": 262144,
+            "repetitions": 157,
+            "seconds": 0.000325485350357244,
+            "checksum": 65660.53164940393
+          }
+        ],
+        "grace-o3": [
+          {
+            "kernel": "dot",
+            "size": 262144,
+            "repetitions": 157,
+            "seconds": 0.00033486305730814816,
+            "checksum": 65660.53164940393
+          },
+          {
+            "kernel": "dot",
+            "size": 262144,
+            "repetitions": 157,
+            "seconds": 0.00032519808915520835,
+            "checksum": 65660.53164940393
+          },
+          {
+            "kernel": "dot",
+            "size": 262144,
+            "repetitions": 157,
+            "seconds": 0.00034185222929913054,
+            "checksum": 65660.53164940393
+          },
+          {
+            "kernel": "dot",
+            "size": 262144,
+            "repetitions": 157,
+            "seconds": 0.0003259726115064933,
+            "checksum": 65660.53164940393
+          },
+          {
+            "kernel": "dot",
+            "size": 262144,
+            "repetitions": 157,
+            "seconds": 0.0003334171974558419,
+            "checksum": 65660.53164940393
+          },
+          {
+            "kernel": "dot",
+            "size": 262144,
+            "repetitions": 157,
+            "seconds": 0.00032719808918346834,
+            "checksum": 65660.53164940393
+          },
+          {
+            "kernel": "dot",
+            "size": 262144,
+            "repetitions": 157,
+            "seconds": 0.0003343649681436586,
+            "checksum": 65660.53164940393
+          },
+          {
+            "kernel": "dot",
+            "size": 262144,
+            "repetitions": 157,
+            "seconds": 0.00032481910834373655,
+            "checksum": 65660.53164940393
+          },
+          {
+            "kernel": "dot",
+            "size": 262144,
+            "repetitions": 157,
+            "seconds": 0.0003246643312073722,
+            "checksum": 65660.53164940393
+          }
+        ]
+      },
+      "execution_order": [
+        [
+          "stock-o3",
+          "grace",
+          "grace-o3",
+          "stock"
+        ],
+        [
+          "grace-o3",
+          "stock-o3",
+          "stock",
+          "grace"
+        ],
+        [
+          "grace",
+          "grace-o3",
+          "stock-o3",
+          "stock"
+        ],
+        [
+          "grace",
+          "stock-o3",
+          "stock",
+          "grace-o3"
+        ],
+        [
+          "grace",
+          "stock-o3",
+          "grace-o3",
+          "stock"
+        ],
+        [
+          "grace",
+          "grace-o3",
+          "stock-o3",
+          "stock"
+        ],
+        [
+          "stock-o3",
+          "grace",
+          "stock",
+          "grace-o3"
+        ],
+        [
+          "grace",
+          "grace-o3",
+          "stock",
+          "stock-o3"
+        ],
+        [
+          "stock",
+          "stock-o3",
+          "grace",
+          "grace-o3"
+        ]
+      ],
+      "reference_checksum": 65660.53164940393,
+      "tolerance": {
+        "relative": 1e-09,
+        "absolute": 1e-07
+      }
+    },
+    {
+      "name": "invariant",
+      "size": 262144,
+      "builds": [
+        {
+          "name": "stock",
+          "compile_seconds": [
+            0.18835260000196286,
+            0.1846679000009317,
+            0.19589689999702387,
+            0.16282360001059715,
+            0.1620186000072863
+          ],
+          "link_seconds": 0.18115279999619815,
+          "binary_bytes": 263092,
+          "object_bytes": 3893,
+          "executable": "D:\\graceopt\\bench\\out\\native\\invariant-stock.exe",
+          "compile_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "-std=c11",
+            "-O2",
+            "-c",
+            "D:\\graceopt\\bench\\kernels\\invariant.c",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\invariant-stock.o"
+          ],
+          "link_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "D:\\graceopt\\bench\\out\\native\\harness.o",
+            "D:\\graceopt\\bench\\out\\native\\invariant-stock.o",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\invariant-stock.exe"
+          ]
+        },
+        {
+          "name": "grace",
+          "compile_seconds": [
+            0.18200070000602864,
+            0.18175540000083856,
+            0.16479460000118706,
+            0.17092150000098627,
+            0.1535061000031419
+          ],
+          "link_seconds": 0.15393449999100994,
+          "binary_bytes": 263092,
+          "object_bytes": 3893,
+          "executable": "D:\\graceopt\\bench\\out\\native\\invariant-grace.exe",
+          "compile_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "-std=c11",
+            "-O2",
+            "-fpass-plugin=D:\\graceopt\\build\\lib\\GraceOpt.dll",
+            "-mllvm",
+            "-grace-pipeline=all",
+            "-c",
+            "D:\\graceopt\\bench\\kernels\\invariant.c",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\invariant-grace.o"
+          ],
+          "link_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "D:\\graceopt\\bench\\out\\native\\harness.o",
+            "D:\\graceopt\\bench\\out\\native\\invariant-grace.o",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\invariant-grace.exe"
+          ]
+        },
+        {
+          "name": "stock-o3",
+          "compile_seconds": [
+            0.20327110000653192,
+            0.16666390000318643,
+            0.162605599995004,
+            0.1661556000035489,
+            0.17377789999591187
+          ],
+          "link_seconds": 0.16820640000514686,
+          "binary_bytes": 263092,
+          "object_bytes": 3893,
+          "executable": "D:\\graceopt\\bench\\out\\native\\invariant-stock-o3.exe",
+          "compile_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "-std=c11",
+            "-O3",
+            "-c",
+            "D:\\graceopt\\bench\\kernels\\invariant.c",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\invariant-stock-o3.o"
+          ],
+          "link_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "D:\\graceopt\\bench\\out\\native\\harness.o",
+            "D:\\graceopt\\bench\\out\\native\\invariant-stock-o3.o",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\invariant-stock-o3.exe"
+          ]
+        },
+        {
+          "name": "grace-o3",
+          "compile_seconds": [
+            0.1490425999945728,
+            0.15232100000139326,
+            0.17731809998804238,
+            0.17080359999090433,
+            0.1629843999980949
+          ],
+          "link_seconds": 0.22945500000787433,
+          "binary_bytes": 263092,
+          "object_bytes": 3893,
+          "executable": "D:\\graceopt\\bench\\out\\native\\invariant-grace-o3.exe",
+          "compile_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "-std=c11",
+            "-O3",
+            "-fpass-plugin=D:\\graceopt\\build\\lib\\GraceOpt.dll",
+            "-mllvm",
+            "-grace-pipeline=all",
+            "-c",
+            "D:\\graceopt\\bench\\kernels\\invariant.c",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\invariant-grace-o3.o"
+          ],
+          "link_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "D:\\graceopt\\bench\\out\\native\\harness.o",
+            "D:\\graceopt\\bench\\out\\native\\invariant-grace-o3.o",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\invariant-grace-o3.exe"
+          ]
+        }
+      ],
+      "repetitions": 129,
+      "samples": {
+        "stock": [
+          {
+            "kernel": "invariant",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.00036835426348712756,
+            "checksum": 132137.97816490196
+          },
+          {
+            "kernel": "invariant",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.00036451782949553993,
+            "checksum": 132137.97816490196
+          },
+          {
+            "kernel": "invariant",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.0003673697674246288,
+            "checksum": 132137.97816490196
+          },
+          {
+            "kernel": "invariant",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.0003598829457904537,
+            "checksum": 132137.97816490196
+          },
+          {
+            "kernel": "invariant",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.0003633271317790053,
+            "checksum": 132137.97816490196
+          },
+          {
+            "kernel": "invariant",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.0003588612403679105,
+            "checksum": 132137.97816490196
+          },
+          {
+            "kernel": "invariant",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.00036139534890124674,
+            "checksum": 132137.97816490196
+          },
+          {
+            "kernel": "invariant",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.0003640457363745068,
+            "checksum": 132137.97816490196
+          },
+          {
+            "kernel": "invariant",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.0003783953487340635,
+            "checksum": 132137.97816490196
+          }
+        ],
+        "grace": [
+          {
+            "kernel": "invariant",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.0003566620155109468,
+            "checksum": 132137.97816490196
+          },
+          {
+            "kernel": "invariant",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.00036602093020991907,
+            "checksum": 132137.97816490196
+          },
+          {
+            "kernel": "invariant",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.00036463953483337175,
+            "checksum": 132137.97816490196
+          },
+          {
+            "kernel": "invariant",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.0003587736433657074,
+            "checksum": 132137.97816490196
+          },
+          {
+            "kernel": "invariant",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.00036763488369192496,
+            "checksum": 132137.97816490196
+          },
+          {
+            "kernel": "invariant",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.0003617976745003979,
+            "checksum": 132137.97816490196
+          },
+          {
+            "kernel": "invariant",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.00036833410852050855,
+            "checksum": 132137.97816490196
+          },
+          {
+            "kernel": "invariant",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.0003649496124577239,
+            "checksum": 132137.97816490196
+          },
+          {
+            "kernel": "invariant",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.0003582922479610659,
+            "checksum": 132137.97816490196
+          }
+        ],
+        "stock-o3": [
+          {
+            "kernel": "invariant",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.0003614651161975177,
+            "checksum": 132137.97816490196
+          },
+          {
+            "kernel": "invariant",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.000367515503840391,
+            "checksum": 132137.97816490196
+          },
+          {
+            "kernel": "invariant",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.00036004031008892774,
+            "checksum": 132137.97816490196
+          },
+          {
+            "kernel": "invariant",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.0003623286821218857,
+            "checksum": 132137.97816490196
+          },
+          {
+            "kernel": "invariant",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.0003633627907396475,
+            "checksum": 132137.97816490196
+          },
+          {
+            "kernel": "invariant",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.0003593271317785288,
+            "checksum": 132137.97816490196
+          },
+          {
+            "kernel": "invariant",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.000364111627897883,
+            "checksum": 132137.97816490196
+          },
+          {
+            "kernel": "invariant",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.0003747906976482333,
+            "checksum": 132137.97816490196
+          },
+          {
+            "kernel": "invariant",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.00037078062016444727,
+            "checksum": 132137.97816490196
+          }
+        ],
+        "grace-o3": [
+          {
+            "kernel": "invariant",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.0003606224806650809,
+            "checksum": 132137.97816490196
+          },
+          {
+            "kernel": "invariant",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.00036686046505635675,
+            "checksum": 132137.97816490196
+          },
+          {
+            "kernel": "invariant",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.0003619302326340459,
+            "checksum": 132137.97816490196
+          },
+          {
+            "kernel": "invariant",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.0003579883721599341,
+            "checksum": 132137.97816490196
+          },
+          {
+            "kernel": "invariant",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.00036062248055227533,
+            "checksum": 132137.97816490196
+          },
+          {
+            "kernel": "invariant",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.0003680341084922714,
+            "checksum": 132137.97816490196
+          },
+          {
+            "kernel": "invariant",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.0003576899224182937,
+            "checksum": 132137.97816490196
+          },
+          {
+            "kernel": "invariant",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.0003585379844614442,
+            "checksum": 132137.97816490196
+          },
+          {
+            "kernel": "invariant",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.0003660790697362837,
+            "checksum": 132137.97816490196
+          }
+        ]
+      },
+      "execution_order": [
+        [
+          "stock-o3",
+          "grace",
+          "grace-o3",
+          "stock"
+        ],
+        [
+          "grace-o3",
+          "stock-o3",
+          "stock",
+          "grace"
+        ],
+        [
+          "grace",
+          "grace-o3",
+          "stock-o3",
+          "stock"
+        ],
+        [
+          "grace",
+          "stock-o3",
+          "stock",
+          "grace-o3"
+        ],
+        [
+          "grace",
+          "stock-o3",
+          "grace-o3",
+          "stock"
+        ],
+        [
+          "grace",
+          "grace-o3",
+          "stock-o3",
+          "stock"
+        ],
+        [
+          "stock-o3",
+          "grace",
+          "stock",
+          "grace-o3"
+        ],
+        [
+          "grace",
+          "grace-o3",
+          "stock",
+          "stock-o3"
+        ],
+        [
+          "stock",
+          "stock-o3",
+          "grace",
+          "grace-o3"
+        ]
+      ],
+      "reference_checksum": 132137.97816490196,
+      "tolerance": {
+        "relative": 1e-09,
+        "absolute": 1e-07
+      }
+    },
+    {
+      "name": "redundant",
+      "size": 65536,
+      "builds": [
+        {
+          "name": "stock",
+          "compile_seconds": [
+            0.17892450001090765,
+            0.17697020000196062,
+            0.16996149999613408,
+            0.1784202999988338,
+            0.17735120000725146
+          ],
+          "link_seconds": 0.1818945000122767,
+          "binary_bytes": 263068,
+          "object_bytes": 3765,
+          "executable": "D:\\graceopt\\bench\\out\\native\\redundant-stock.exe",
+          "compile_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "-std=c11",
+            "-O2",
+            "-c",
+            "D:\\graceopt\\bench\\kernels\\redundant.c",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\redundant-stock.o"
+          ],
+          "link_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "D:\\graceopt\\bench\\out\\native\\harness.o",
+            "D:\\graceopt\\bench\\out\\native\\redundant-stock.o",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\redundant-stock.exe"
+          ]
+        },
+        {
+          "name": "grace",
+          "compile_seconds": [
+            0.1646611999894958,
+            0.16078649999690242,
+            0.1550379999971483,
+            0.15888590000395197,
+            0.16533810000692029
+          ],
+          "link_seconds": 0.14877900001010858,
+          "binary_bytes": 263068,
+          "object_bytes": 3765,
+          "executable": "D:\\graceopt\\bench\\out\\native\\redundant-grace.exe",
+          "compile_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "-std=c11",
+            "-O2",
+            "-fpass-plugin=D:\\graceopt\\build\\lib\\GraceOpt.dll",
+            "-mllvm",
+            "-grace-pipeline=all",
+            "-c",
+            "D:\\graceopt\\bench\\kernels\\redundant.c",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\redundant-grace.o"
+          ],
+          "link_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "D:\\graceopt\\bench\\out\\native\\harness.o",
+            "D:\\graceopt\\bench\\out\\native\\redundant-grace.o",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\redundant-grace.exe"
+          ]
+        },
+        {
+          "name": "stock-o3",
+          "compile_seconds": [
+            0.14903770000091754,
+            0.18666469999880064,
+            0.1640118000068469,
+            0.14556269999593496,
+            0.1449231000005966
+          ],
+          "link_seconds": 0.18631229999300558,
+          "binary_bytes": 263068,
+          "object_bytes": 3765,
+          "executable": "D:\\graceopt\\bench\\out\\native\\redundant-stock-o3.exe",
+          "compile_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "-std=c11",
+            "-O3",
+            "-c",
+            "D:\\graceopt\\bench\\kernels\\redundant.c",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\redundant-stock-o3.o"
+          ],
+          "link_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "D:\\graceopt\\bench\\out\\native\\harness.o",
+            "D:\\graceopt\\bench\\out\\native\\redundant-stock-o3.o",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\redundant-stock-o3.exe"
+          ]
+        },
+        {
+          "name": "grace-o3",
+          "compile_seconds": [
+            0.1461154999997234,
+            0.16186219999508467,
+            0.21789189999981318,
+            0.17695359999197535,
+            0.16129380000347737
+          ],
+          "link_seconds": 0.17276119999587536,
+          "binary_bytes": 263068,
+          "object_bytes": 3765,
+          "executable": "D:\\graceopt\\bench\\out\\native\\redundant-grace-o3.exe",
+          "compile_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "-std=c11",
+            "-O3",
+            "-fpass-plugin=D:\\graceopt\\build\\lib\\GraceOpt.dll",
+            "-mllvm",
+            "-grace-pipeline=all",
+            "-c",
+            "D:\\graceopt\\bench\\kernels\\redundant.c",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\redundant-grace-o3.o"
+          ],
+          "link_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "D:\\graceopt\\bench\\out\\native\\harness.o",
+            "D:\\graceopt\\bench\\out\\native\\redundant-grace-o3.o",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\redundant-grace-o3.exe"
+          ]
+        }
+      ],
+      "repetitions": 182,
+      "samples": {
+        "stock": [
+          {
+            "kernel": "redundant",
+            "size": 65536,
+            "repetitions": 182,
+            "seconds": 0.0002523829670690747,
+            "checksum": 39942.053529461
+          },
+          {
+            "kernel": "redundant",
+            "size": 65536,
+            "repetitions": 182,
+            "seconds": 0.0002542895604414958,
+            "checksum": 39942.053529461
+          },
+          {
+            "kernel": "redundant",
+            "size": 65536,
+            "repetitions": 182,
+            "seconds": 0.0002570296703277483,
+            "checksum": 39942.053529461
+          },
+          {
+            "kernel": "redundant",
+            "size": 65536,
+            "repetitions": 182,
+            "seconds": 0.00026066098899508896,
+            "checksum": 39942.053529461
+          },
+          {
+            "kernel": "redundant",
+            "size": 65536,
+            "repetitions": 182,
+            "seconds": 0.0002480769231064747,
+            "checksum": 39942.053529461
+          },
+          {
+            "kernel": "redundant",
+            "size": 65536,
+            "repetitions": 182,
+            "seconds": 0.00030546978022967167,
+            "checksum": 39942.053529461
+          },
+          {
+            "kernel": "redundant",
+            "size": 65536,
+            "repetitions": 182,
+            "seconds": 0.00027253901098847166,
+            "checksum": 39942.053529461
+          },
+          {
+            "kernel": "redundant",
+            "size": 65536,
+            "repetitions": 182,
+            "seconds": 0.00025029560444866315,
+            "checksum": 39942.053529461
+          },
+          {
+            "kernel": "redundant",
+            "size": 65536,
+            "repetitions": 182,
+            "seconds": 0.0002528291208743742,
+            "checksum": 39942.053529461
+          }
+        ],
+        "grace": [
+          {
+            "kernel": "redundant",
+            "size": 65536,
+            "repetitions": 182,
+            "seconds": 0.0002529763736235039,
+            "checksum": 39942.053529461
+          },
+          {
+            "kernel": "redundant",
+            "size": 65536,
+            "repetitions": 182,
+            "seconds": 0.0002547901099455635,
+            "checksum": 39942.053529461
+          },
+          {
+            "kernel": "redundant",
+            "size": 65536,
+            "repetitions": 182,
+            "seconds": 0.00027097472527632386,
+            "checksum": 39942.053529461
+          },
+          {
+            "kernel": "redundant",
+            "size": 65536,
+            "repetitions": 182,
+            "seconds": 0.0002564785713880006,
+            "checksum": 39942.053529461
+          },
+          {
+            "kernel": "redundant",
+            "size": 65536,
+            "repetitions": 182,
+            "seconds": 0.00025118241759188536,
+            "checksum": 39942.053529461
+          },
+          {
+            "kernel": "redundant",
+            "size": 65536,
+            "repetitions": 182,
+            "seconds": 0.0002538324176214871,
+            "checksum": 39942.053529461
+          },
+          {
+            "kernel": "redundant",
+            "size": 65536,
+            "repetitions": 182,
+            "seconds": 0.00026600824176157303,
+            "checksum": 39942.053529461
+          },
+          {
+            "kernel": "redundant",
+            "size": 65536,
+            "repetitions": 182,
+            "seconds": 0.00024937637363609113,
+            "checksum": 39942.053529461
+          },
+          {
+            "kernel": "redundant",
+            "size": 65536,
+            "repetitions": 182,
+            "seconds": 0.00025185164841976795,
+            "checksum": 39942.053529461
+          }
+        ],
+        "stock-o3": [
+          {
+            "kernel": "redundant",
+            "size": 65536,
+            "repetitions": 182,
+            "seconds": 0.00026104285715628867,
+            "checksum": 39942.053529461
+          },
+          {
+            "kernel": "redundant",
+            "size": 65536,
+            "repetitions": 182,
+            "seconds": 0.0002502505494004044,
+            "checksum": 39942.053529461
+          },
+          {
+            "kernel": "redundant",
+            "size": 65536,
+            "repetitions": 182,
+            "seconds": 0.0002529620878803953,
+            "checksum": 39942.053529461
+          },
+          {
+            "kernel": "redundant",
+            "size": 65536,
+            "repetitions": 182,
+            "seconds": 0.0002485675824253441,
+            "checksum": 39942.053529461
+          },
+          {
+            "kernel": "redundant",
+            "size": 65536,
+            "repetitions": 182,
+            "seconds": 0.0002555159340512806,
+            "checksum": 39942.053529461
+          },
+          {
+            "kernel": "redundant",
+            "size": 65536,
+            "repetitions": 182,
+            "seconds": 0.0003103098901152447,
+            "checksum": 39942.053529461
+          },
+          {
+            "kernel": "redundant",
+            "size": 65536,
+            "repetitions": 182,
+            "seconds": 0.00026943186813886124,
+            "checksum": 39942.053529461
+          },
+          {
+            "kernel": "redundant",
+            "size": 65536,
+            "repetitions": 182,
+            "seconds": 0.00024982362635085707,
+            "checksum": 39942.053529461
+          },
+          {
+            "kernel": "redundant",
+            "size": 65536,
+            "repetitions": 182,
+            "seconds": 0.00025652472526577024,
+            "checksum": 39942.053529461
+          }
+        ],
+        "grace-o3": [
+          {
+            "kernel": "redundant",
+            "size": 65536,
+            "repetitions": 182,
+            "seconds": 0.00025900384615262415,
+            "checksum": 39942.053529461
+          },
+          {
+            "kernel": "redundant",
+            "size": 65536,
+            "repetitions": 182,
+            "seconds": 0.00025544670331458164,
+            "checksum": 39942.053529461
+          },
+          {
+            "kernel": "redundant",
+            "size": 65536,
+            "repetitions": 182,
+            "seconds": 0.0002586758241555039,
+            "checksum": 39942.053529461
+          },
+          {
+            "kernel": "redundant",
+            "size": 65536,
+            "repetitions": 182,
+            "seconds": 0.00026094010984077334,
+            "checksum": 39942.053529461
+          },
+          {
+            "kernel": "redundant",
+            "size": 65536,
+            "repetitions": 182,
+            "seconds": 0.0002539642857180417,
+            "checksum": 39942.053529461
+          },
+          {
+            "kernel": "redundant",
+            "size": 65536,
+            "repetitions": 182,
+            "seconds": 0.0002735791208828892,
+            "checksum": 39942.053529461
+          },
+          {
+            "kernel": "redundant",
+            "size": 65536,
+            "repetitions": 182,
+            "seconds": 0.00026366593406387286,
+            "checksum": 39942.053529461
+          },
+          {
+            "kernel": "redundant",
+            "size": 65536,
+            "repetitions": 182,
+            "seconds": 0.00025195494503010537,
+            "checksum": 39942.053529461
+          },
+          {
+            "kernel": "redundant",
+            "size": 65536,
+            "repetitions": 182,
+            "seconds": 0.00025301593404447473,
+            "checksum": 39942.053529461
+          }
+        ]
+      },
+      "execution_order": [
+        [
+          "stock-o3",
+          "grace",
+          "grace-o3",
+          "stock"
+        ],
+        [
+          "grace-o3",
+          "stock-o3",
+          "stock",
+          "grace"
+        ],
+        [
+          "grace",
+          "grace-o3",
+          "stock-o3",
+          "stock"
+        ],
+        [
+          "grace",
+          "stock-o3",
+          "stock",
+          "grace-o3"
+        ],
+        [
+          "grace",
+          "stock-o3",
+          "grace-o3",
+          "stock"
+        ],
+        [
+          "grace",
+          "grace-o3",
+          "stock-o3",
+          "stock"
+        ],
+        [
+          "stock-o3",
+          "grace",
+          "stock",
+          "grace-o3"
+        ],
+        [
+          "grace",
+          "grace-o3",
+          "stock",
+          "stock-o3"
+        ],
+        [
+          "stock",
+          "stock-o3",
+          "grace",
+          "grace-o3"
+        ]
+      ],
+      "reference_checksum": 39942.053529461,
+      "tolerance": {
+        "relative": 1e-09,
+        "absolute": 1e-07
+      }
+    },
+    {
+      "name": "stencil",
+      "size": 262144,
+      "builds": [
+        {
+          "name": "stock",
+          "compile_seconds": [
+            0.17992349999258295,
+            0.18121019999671262,
+            0.17620410000381526,
+            0.21978549999766983,
+            0.17993209999985993
+          ],
+          "link_seconds": 0.1816576000128407,
+          "binary_bytes": 263580,
+          "object_bytes": 4029,
+          "executable": "D:\\graceopt\\bench\\out\\native\\stencil-stock.exe",
+          "compile_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "-std=c11",
+            "-O2",
+            "-c",
+            "D:\\graceopt\\bench\\kernels\\stencil.c",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\stencil-stock.o"
+          ],
+          "link_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "D:\\graceopt\\bench\\out\\native\\harness.o",
+            "D:\\graceopt\\bench\\out\\native\\stencil-stock.o",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\stencil-stock.exe"
+          ]
+        },
+        {
+          "name": "grace",
+          "compile_seconds": [
+            0.16796459999750368,
+            0.15350120000948664,
+            0.1653029000008246,
+            0.1610352999996394,
+            0.2315223000041442
+          ],
+          "link_seconds": 0.15785509999841452,
+          "binary_bytes": 263580,
+          "object_bytes": 4029,
+          "executable": "D:\\graceopt\\bench\\out\\native\\stencil-grace.exe",
+          "compile_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "-std=c11",
+            "-O2",
+            "-fpass-plugin=D:\\graceopt\\build\\lib\\GraceOpt.dll",
+            "-mllvm",
+            "-grace-pipeline=all",
+            "-c",
+            "D:\\graceopt\\bench\\kernels\\stencil.c",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\stencil-grace.o"
+          ],
+          "link_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "D:\\graceopt\\bench\\out\\native\\harness.o",
+            "D:\\graceopt\\bench\\out\\native\\stencil-grace.o",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\stencil-grace.exe"
+          ]
+        },
+        {
+          "name": "stock-o3",
+          "compile_seconds": [
+            0.15605990000767633,
+            0.15093889999843668,
+            0.14592130000528414,
+            0.152978099999018,
+            0.16712299999198876
+          ],
+          "link_seconds": 0.18246530000760686,
+          "binary_bytes": 263580,
+          "object_bytes": 4029,
+          "executable": "D:\\graceopt\\bench\\out\\native\\stencil-stock-o3.exe",
+          "compile_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "-std=c11",
+            "-O3",
+            "-c",
+            "D:\\graceopt\\bench\\kernels\\stencil.c",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\stencil-stock-o3.o"
+          ],
+          "link_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "D:\\graceopt\\bench\\out\\native\\harness.o",
+            "D:\\graceopt\\bench\\out\\native\\stencil-stock-o3.o",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\stencil-stock-o3.exe"
+          ]
+        },
+        {
+          "name": "grace-o3",
+          "compile_seconds": [
+            0.17191780000575818,
+            0.18315559999609832,
+            0.1526321999990614,
+            0.1753951999999117,
+            0.155993699998362
+          ],
+          "link_seconds": 0.1564390999992611,
+          "binary_bytes": 263580,
+          "object_bytes": 4029,
+          "executable": "D:\\graceopt\\bench\\out\\native\\stencil-grace-o3.exe",
+          "compile_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "-std=c11",
+            "-O3",
+            "-fpass-plugin=D:\\graceopt\\build\\lib\\GraceOpt.dll",
+            "-mllvm",
+            "-grace-pipeline=all",
+            "-c",
+            "D:\\graceopt\\bench\\kernels\\stencil.c",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\stencil-grace-o3.o"
+          ],
+          "link_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "D:\\graceopt\\bench\\out\\native\\harness.o",
+            "D:\\graceopt\\bench\\out\\native\\stencil-grace-o3.o",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\stencil-grace-o3.exe"
+          ]
+        }
+      ],
+      "repetitions": 129,
+      "samples": {
+        "stock": [
+          {
+            "kernel": "stencil",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.0004297596899487526,
+            "checksum": 131057.23502334952
+          },
+          {
+            "kernel": "stencil",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.00041133720938083825,
+            "checksum": 131057.23502334952
+          },
+          {
+            "kernel": "stencil",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.0004000418604930949,
+            "checksum": 131057.23502334952
+          },
+          {
+            "kernel": "stencil",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.0004034767441980382,
+            "checksum": 131057.23502334952
+          },
+          {
+            "kernel": "stencil",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.0004116550387765909,
+            "checksum": 131057.23502334952
+          },
+          {
+            "kernel": "stencil",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.00039657054262780836,
+            "checksum": 131057.23502334952
+          },
+          {
+            "kernel": "stencil",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.000405941085322298,
+            "checksum": 131057.23502334952
+          },
+          {
+            "kernel": "stencil",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.0004284077519352382,
+            "checksum": 131057.23502334952
+          },
+          {
+            "kernel": "stencil",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.00039475426360307793,
+            "checksum": 131057.23502334952
+          }
+        ],
+        "grace": [
+          {
+            "kernel": "stencil",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.0004079031007627906,
+            "checksum": 131057.23502334952
+          },
+          {
+            "kernel": "stencil",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.00040169844962024785,
+            "checksum": 131057.23502334952
+          },
+          {
+            "kernel": "stencil",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.00043405813957806387,
+            "checksum": 131057.23502334952
+          },
+          {
+            "kernel": "stencil",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.0003947325581242511,
+            "checksum": 131057.23502334952
+          },
+          {
+            "kernel": "stencil",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.00040345348843261457,
+            "checksum": 131057.23502334952
+          },
+          {
+            "kernel": "stencil",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.00041151627904533356,
+            "checksum": 131057.23502334952
+          },
+          {
+            "kernel": "stencil",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.00040460077519149544,
+            "checksum": 131057.23502334952
+          },
+          {
+            "kernel": "stencil",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.00040373255818172595,
+            "checksum": 131057.23502334952
+          },
+          {
+            "kernel": "stencil",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.00041211472870240554,
+            "checksum": 131057.23502334952
+          }
+        ],
+        "stock-o3": [
+          {
+            "kernel": "stencil",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.00040754573640789,
+            "checksum": 131057.23502334952
+          },
+          {
+            "kernel": "stencil",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.00040202480621271325,
+            "checksum": 131057.23502334952
+          },
+          {
+            "kernel": "stencil",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.0004073426356654643,
+            "checksum": 131057.23502334952
+          },
+          {
+            "kernel": "stencil",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.0003984108527304691,
+            "checksum": 131057.23502334952
+          },
+          {
+            "kernel": "stencil",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.00039896511623018616,
+            "checksum": 131057.23502334952
+          },
+          {
+            "kernel": "stencil",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.0003948085271309368,
+            "checksum": 131057.23502334952
+          },
+          {
+            "kernel": "stencil",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.00039533565897953,
+            "checksum": 131057.23502334952
+          },
+          {
+            "kernel": "stencil",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.00044320697673730006,
+            "checksum": 131057.23502334952
+          },
+          {
+            "kernel": "stencil",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.000397439534837279,
+            "checksum": 131057.23502334952
+          }
+        ],
+        "grace-o3": [
+          {
+            "kernel": "stencil",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.0004089116279032197,
+            "checksum": 131057.23502334952
+          },
+          {
+            "kernel": "stencil",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.0003997294572696393,
+            "checksum": 131057.23502334952
+          },
+          {
+            "kernel": "stencil",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.0004163449612092371,
+            "checksum": 131057.23502334952
+          },
+          {
+            "kernel": "stencil",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.0003965604651444989,
+            "checksum": 131057.23502334952
+          },
+          {
+            "kernel": "stencil",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.0003964658914577909,
+            "checksum": 131057.23502334952
+          },
+          {
+            "kernel": "stencil",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.00041998372085630723,
+            "checksum": 131057.23502334952
+          },
+          {
+            "kernel": "stencil",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.00039808604653740606,
+            "checksum": 131057.23502334952
+          },
+          {
+            "kernel": "stencil",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.0004028767442543695,
+            "checksum": 131057.23502334952
+          },
+          {
+            "kernel": "stencil",
+            "size": 262144,
+            "repetitions": 129,
+            "seconds": 0.00040123410860903186,
+            "checksum": 131057.23502334952
+          }
+        ]
+      },
+      "execution_order": [
+        [
+          "stock-o3",
+          "grace",
+          "grace-o3",
+          "stock"
+        ],
+        [
+          "grace-o3",
+          "stock-o3",
+          "stock",
+          "grace"
+        ],
+        [
+          "grace",
+          "grace-o3",
+          "stock-o3",
+          "stock"
+        ],
+        [
+          "grace",
+          "stock-o3",
+          "stock",
+          "grace-o3"
+        ],
+        [
+          "grace",
+          "stock-o3",
+          "grace-o3",
+          "stock"
+        ],
+        [
+          "grace",
+          "grace-o3",
+          "stock-o3",
+          "stock"
+        ],
+        [
+          "stock-o3",
+          "grace",
+          "stock",
+          "grace-o3"
+        ],
+        [
+          "grace",
+          "grace-o3",
+          "stock",
+          "stock-o3"
+        ],
+        [
+          "stock",
+          "stock-o3",
+          "grace",
+          "grace-o3"
+        ]
+      ],
+      "reference_checksum": 131057.23502334952,
+      "tolerance": {
+        "relative": 1e-09,
+        "absolute": 1e-07
+      }
+    },
+    {
+      "name": "matmul",
+      "size": 96,
+      "builds": [
+        {
+          "name": "stock",
+          "compile_seconds": [
+            0.25158390001161024,
+            0.1737282999965828,
+            0.16892480000387877,
+            0.17186060000676662,
+            0.181259000004502
+          ],
+          "link_seconds": 0.18011570000089705,
+          "binary_bytes": 263596,
+          "object_bytes": 4220,
+          "executable": "D:\\graceopt\\bench\\out\\native\\matmul-stock.exe",
+          "compile_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "-std=c11",
+            "-O2",
+            "-c",
+            "D:\\graceopt\\bench\\kernels\\matmul.c",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\matmul-stock.o"
+          ],
+          "link_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "D:\\graceopt\\bench\\out\\native\\harness.o",
+            "D:\\graceopt\\bench\\out\\native\\matmul-stock.o",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\matmul-stock.exe"
+          ]
+        },
+        {
+          "name": "grace",
+          "compile_seconds": [
+            0.1659728999948129,
+            0.1667911999975331,
+            0.17218349999166094,
+            0.1598426999989897,
+            0.16696650000812951
+          ],
+          "link_seconds": 0.1698253999929875,
+          "binary_bytes": 263596,
+          "object_bytes": 4220,
+          "executable": "D:\\graceopt\\bench\\out\\native\\matmul-grace.exe",
+          "compile_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "-std=c11",
+            "-O2",
+            "-fpass-plugin=D:\\graceopt\\build\\lib\\GraceOpt.dll",
+            "-mllvm",
+            "-grace-pipeline=all",
+            "-c",
+            "D:\\graceopt\\bench\\kernels\\matmul.c",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\matmul-grace.o"
+          ],
+          "link_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "D:\\graceopt\\bench\\out\\native\\harness.o",
+            "D:\\graceopt\\bench\\out\\native\\matmul-grace.o",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\matmul-grace.exe"
+          ]
+        },
+        {
+          "name": "stock-o3",
+          "compile_seconds": [
+            0.14953199999581557,
+            0.18171930000244174,
+            0.16318849999515805,
+            0.16708890000882093,
+            0.15255969999998342
+          ],
+          "link_seconds": 0.1506638999999268,
+          "binary_bytes": 263596,
+          "object_bytes": 4220,
+          "executable": "D:\\graceopt\\bench\\out\\native\\matmul-stock-o3.exe",
+          "compile_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "-std=c11",
+            "-O3",
+            "-c",
+            "D:\\graceopt\\bench\\kernels\\matmul.c",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\matmul-stock-o3.o"
+          ],
+          "link_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "D:\\graceopt\\bench\\out\\native\\harness.o",
+            "D:\\graceopt\\bench\\out\\native\\matmul-stock-o3.o",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\matmul-stock-o3.exe"
+          ]
+        },
+        {
+          "name": "grace-o3",
+          "compile_seconds": [
+            0.17082050000317395,
+            0.16880340001080185,
+            0.15804429999843705,
+            0.18427119999250863,
+            0.2229430000006687
+          ],
+          "link_seconds": 0.20104330001049675,
+          "binary_bytes": 263596,
+          "object_bytes": 4220,
+          "executable": "D:\\graceopt\\bench\\out\\native\\matmul-grace-o3.exe",
+          "compile_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "-std=c11",
+            "-O3",
+            "-fpass-plugin=D:\\graceopt\\build\\lib\\GraceOpt.dll",
+            "-mllvm",
+            "-grace-pipeline=all",
+            "-c",
+            "D:\\graceopt\\bench\\kernels\\matmul.c",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\matmul-grace-o3.o"
+          ],
+          "link_command": [
+            "C:\\msys64\\ucrt64\\bin\\clang.exe",
+            "D:\\graceopt\\bench\\out\\native\\harness.o",
+            "D:\\graceopt\\bench\\out\\native\\matmul-grace-o3.o",
+            "-o",
+            "D:\\graceopt\\bench\\out\\native\\matmul-grace-o3.exe"
+          ]
+        }
+      ],
+      "repetitions": 60,
+      "samples": {
+        "stock": [
+          {
+            "kernel": "matmul",
+            "size": 96,
+            "repetitions": 60,
+            "seconds": 0.0007889533332975892,
+            "checksum": 221563.00282287598
+          },
+          {
+            "kernel": "matmul",
+            "size": 96,
+            "repetitions": 60,
+            "seconds": 0.0007397316665446851,
+            "checksum": 221563.00282287598
+          },
+          {
+            "kernel": "matmul",
+            "size": 96,
+            "repetitions": 60,
+            "seconds": 0.0008183566666654466,
+            "checksum": 221563.00282287598
+          },
+          {
+            "kernel": "matmul",
+            "size": 96,
+            "repetitions": 60,
+            "seconds": 0.0007166966667379407,
+            "checksum": 221563.00282287598
+          },
+          {
+            "kernel": "matmul",
+            "size": 96,
+            "repetitions": 60,
+            "seconds": 0.0008236833331466187,
+            "checksum": 221563.00282287598
+          },
+          {
+            "kernel": "matmul",
+            "size": 96,
+            "repetitions": 60,
+            "seconds": 0.0008113133333002528,
+            "checksum": 221563.00282287598
+          },
+          {
+            "kernel": "matmul",
+            "size": 96,
+            "repetitions": 60,
+            "seconds": 0.0008723299998867636,
+            "checksum": 221563.00282287598
+          },
+          {
+            "kernel": "matmul",
+            "size": 96,
+            "repetitions": 60,
+            "seconds": 0.0007516583333199378,
+            "checksum": 221563.00282287598
+          },
+          {
+            "kernel": "matmul",
+            "size": 96,
+            "repetitions": 60,
+            "seconds": 0.000701876666668492,
+            "checksum": 221563.00282287598
+          }
+        ],
+        "grace": [
+          {
+            "kernel": "matmul",
+            "size": 96,
+            "repetitions": 60,
+            "seconds": 0.0007146200000230844,
+            "checksum": 221563.00282287598
+          },
+          {
+            "kernel": "matmul",
+            "size": 96,
+            "repetitions": 60,
+            "seconds": 0.0007205450000280204,
+            "checksum": 221563.00282287598
+          },
+          {
+            "kernel": "matmul",
+            "size": 96,
+            "repetitions": 60,
+            "seconds": 0.0007300083331453303,
+            "checksum": 221563.00282287598
+          },
+          {
+            "kernel": "matmul",
+            "size": 96,
+            "repetitions": 60,
+            "seconds": 0.0007383783333352767,
+            "checksum": 221563.00282287598
+          },
+          {
+            "kernel": "matmul",
+            "size": 96,
+            "repetitions": 60,
+            "seconds": 0.0008024233335163444,
+            "checksum": 221563.00282287598
+          },
+          {
+            "kernel": "matmul",
+            "size": 96,
+            "repetitions": 60,
+            "seconds": 0.0008009350000065752,
+            "checksum": 221563.00282287598
+          },
+          {
+            "kernel": "matmul",
+            "size": 96,
+            "repetitions": 60,
+            "seconds": 0.0007307183334584503,
+            "checksum": 221563.00282287598
+          },
+          {
+            "kernel": "matmul",
+            "size": 96,
+            "repetitions": 60,
+            "seconds": 0.0007524883333341374,
+            "checksum": 221563.00282287598
+          },
+          {
+            "kernel": "matmul",
+            "size": 96,
+            "repetitions": 60,
+            "seconds": 0.0007192050000109399,
+            "checksum": 221563.00282287598
+          }
+        ],
+        "stock-o3": [
+          {
+            "kernel": "matmul",
+            "size": 96,
+            "repetitions": 60,
+            "seconds": 0.0007532483333003863,
+            "checksum": 221563.00282287598
+          },
+          {
+            "kernel": "matmul",
+            "size": 96,
+            "repetitions": 60,
+            "seconds": 0.0007384600001387298,
+            "checksum": 221563.00282287598
+          },
+          {
+            "kernel": "matmul",
+            "size": 96,
+            "repetitions": 60,
+            "seconds": 0.0007640000001022903,
+            "checksum": 221563.00282287598
+          },
+          {
+            "kernel": "matmul",
+            "size": 96,
+            "repetitions": 60,
+            "seconds": 0.0007823366664524656,
+            "checksum": 221563.00282287598
+          },
+          {
+            "kernel": "matmul",
+            "size": 96,
+            "repetitions": 60,
+            "seconds": 0.0007723249999495844,
+            "checksum": 221563.00282287598
+          },
+          {
+            "kernel": "matmul",
+            "size": 96,
+            "repetitions": 60,
+            "seconds": 0.0008062916667161819,
+            "checksum": 221563.00282287598
+          },
+          {
+            "kernel": "matmul",
+            "size": 96,
+            "repetitions": 60,
+            "seconds": 0.000837616666588777,
+            "checksum": 221563.00282287598
+          },
+          {
+            "kernel": "matmul",
+            "size": 96,
+            "repetitions": 60,
+            "seconds": 0.0007107433334264594,
+            "checksum": 221563.00282287598
+          },
+          {
+            "kernel": "matmul",
+            "size": 96,
+            "repetitions": 60,
+            "seconds": 0.0007513916665629949,
+            "checksum": 221563.00282287598
+          }
+        ],
+        "grace-o3": [
+          {
+            "kernel": "matmul",
+            "size": 96,
+            "repetitions": 60,
+            "seconds": 0.000794776666831846,
+            "checksum": 221563.00282287598
+          },
+          {
+            "kernel": "matmul",
+            "size": 96,
+            "repetitions": 60,
+            "seconds": 0.0007485016668700458,
+            "checksum": 221563.00282287598
+          },
+          {
+            "kernel": "matmul",
+            "size": 96,
+            "repetitions": 60,
+            "seconds": 0.000727151666796999,
+            "checksum": 221563.00282287598
+          },
+          {
+            "kernel": "matmul",
+            "size": 96,
+            "repetitions": 60,
+            "seconds": 0.0007344216666145561,
+            "checksum": 221563.00282287598
+          },
+          {
+            "kernel": "matmul",
+            "size": 96,
+            "repetitions": 60,
+            "seconds": 0.0008504999997967389,
+            "checksum": 221563.00282287598
+          },
+          {
+            "kernel": "matmul",
+            "size": 96,
+            "repetitions": 60,
+            "seconds": 0.0008091416665896152,
+            "checksum": 221563.00282287598
+          },
+          {
+            "kernel": "matmul",
+            "size": 96,
+            "repetitions": 60,
+            "seconds": 0.0007868733332240178,
+            "checksum": 221563.00282287598
+          },
+          {
+            "kernel": "matmul",
+            "size": 96,
+            "repetitions": 60,
+            "seconds": 0.0007035116667490608,
+            "checksum": 221563.00282287598
+          },
+          {
+            "kernel": "matmul",
+            "size": 96,
+            "repetitions": 60,
+            "seconds": 0.000734803333277038,
+            "checksum": 221563.00282287598
+          }
+        ]
+      },
+      "execution_order": [
+        [
+          "stock-o3",
+          "grace",
+          "grace-o3",
+          "stock"
+        ],
+        [
+          "grace-o3",
+          "stock-o3",
+          "stock",
+          "grace"
+        ],
+        [
+          "grace",
+          "grace-o3",
+          "stock-o3",
+          "stock"
+        ],
+        [
+          "grace",
+          "stock-o3",
+          "stock",
+          "grace-o3"
+        ],
+        [
+          "grace",
+          "stock-o3",
+          "grace-o3",
+          "stock"
+        ],
+        [
+          "grace",
+          "grace-o3",
+          "stock-o3",
+          "stock"
+        ],
+        [
+          "stock-o3",
+          "grace",
+          "stock",
+          "grace-o3"
+        ],
+        [
+          "grace",
+          "grace-o3",
+          "stock",
+          "stock-o3"
+        ],
+        [
+          "stock",
+          "stock-o3",
+          "grace",
+          "grace-o3"
+        ]
+      ],
+      "reference_checksum": 221563.00282287598,
+      "tolerance": {
+        "relative": 1e-09,
+        "absolute": 1e-07
+      }
+    }
+  ],
+  "complete": true
+}

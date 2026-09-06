@@ -1,0 +1,16 @@
+D:\graceopt\bench\codegen\kernels.c:4:3: remark: vectorized loop (vectorization width: 4, interleaved count: 4) [-Rpass=loop-vectorize]
+    4 |   for (size_t i = 0; i < n; ++i) y[i] = a * x[i] + y[i];
+      |   ^
+D:\graceopt\bench\codegen\kernels.c:8:3: remark: vectorized loop (vectorization width: vscale x 4, interleaved count: 4) [-Rpass=loop-vectorize]
+    8 |   for (size_t i = 0; i < n; ++i) sum += (double)x[i] * y[i];
+      |   ^
+D:\graceopt\bench\codegen\kernels.c:12:3: remark: vectorized loop (vectorization width: 4, interleaved count: 4) [-Rpass=loop-vectorize]
+   12 |   for (size_t i = 0; i < n; ++i) out[i] = x[i] * ((a * a + b) / (a + 1.0f));
+      |   ^
+D:\graceopt\bench\codegen\kernels.c:15:3: remark: vectorized loop (vectorization width: 4, interleaved count: 4) [-Rpass=loop-vectorize]
+   15 |   for (size_t i = 1; i + 1 < n; ++i)
+      |   ^
+D:\graceopt\bench\codegen\kernels.c:22:7: remark: the cost-model indicates that vectorization is not beneficial [-Rpass-missed=loop-vectorize]
+   22 |       for (size_t k = 0; k < n; ++k) sum += a[i*n+k] * b[k*n+j];
+      |       ^
+D:\graceopt\bench\codegen\kernels.c:22:7: remark: the cost-model indicates that interleaving is not beneficial [-Rpass-missed=loop-vectorize]
