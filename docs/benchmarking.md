@@ -66,7 +66,8 @@ The report uses the median of paired stock/plugin timing ratios. Its 95% interva
 is a seeded paired bootstrap over rounds, not a hardware performance guarantee.
 An interval crossing 1 is inconclusive. Short or noisy experiments and correlated
 thermal drift can make bootstrap intervals optimistic; confidence must come from
-repeat experiments as well. The report includes median timings, coefficient of
+repeat experiments as well. Intervals are per comparison without a multiple-testing
+correction. The report includes median timings, coefficient of
 variation in CSV, executable size delta and median compile-time delta.
 
 ## Grace / AArch64
@@ -91,7 +92,9 @@ at `-O2`/`-O3`. It saves `.s`, `.ll`, optimization remarks and a command/hash
 manifest. Instruction/NEON/SVE line counts are descriptive syntax counts, not
 cycle estimates. Freestanding kernels omit the runtime harness and checksum,
 so their assembly is an inspection aid rather than the exact timed executable.
-Use `llvm-objdump -d bench/out/native/<kernel>-<variant>` to inspect native code.
+Run `python scripts/inspect_native.py` to save native kernel disassembly and
+normalized hashes. `llvm-objdump -d bench/out/native/<kernel>-<variant>` inspects
+the full native executable.
 
 ## Investigating regressions
 
