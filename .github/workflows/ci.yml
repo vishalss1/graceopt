@@ -5,6 +5,10 @@ permissions:
 jobs:
   windows-llvm22:
     runs-on: windows-latest
+    env:
+      # Keep the compiler, headers, DLLs and tools on the validated LLVM build.
+      # MSYS2's rolling repository may otherwise install a newer LLVM major.
+      LLVM_PACKAGE_VERSION: "22.1.4-4"
     defaults:
       run:
         shell: msys2 {0}
@@ -16,11 +20,28 @@ jobs:
           update: true
           install: >-
             git
-            mingw-w64-ucrt-x86_64-clang
-            mingw-w64-ucrt-x86_64-llvm
             mingw-w64-ucrt-x86_64-cmake
             mingw-w64-ucrt-x86_64-ninja
             mingw-w64-ucrt-x86_64-python
+      - name: Install pinned LLVM 22 toolchain
+        run: |
+          set -euo pipefail
+          packages=()
+          for component in clang clang-libs llvm llvm-libs llvm-tools; do
+            packages+=("https://repo.msys2.org/mingw/ucrt64/mingw-w64-ucrt-x86_64-${component}-${LLVM_PACKAGE_VERSION}-any.pkg.tar.zst")
+          done
+          pacman -U --noconfirm "${packages[@]}"
+      - name: Verify pinned compiler and LLVM packages
+        run: |
+          set -euo pipefail
+          for component in clang clang-libs llvm llvm-libs llvm-tools; do
+            package="mingw-w64-ucrt-x86_64-${component}"
+            pacman -Q "$package"
+            test "$(pacman -Q "$package" | cut -d ' ' -f 2)" = "$LLVM_PACKAGE_VERSION"
+          done
+          test "$(llvm-config --version)" = "${LLVM_PACKAGE_VERSION%-*}"
+          clang --version
+          opt --version
       - name: Configure
         run: cmake -S . -B build -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DLLVM_DIR=/ucrt64/lib/cmake/llvm
       - name: Build

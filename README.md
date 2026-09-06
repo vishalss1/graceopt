@@ -27,6 +27,12 @@ suffix; multi-configuration Release/Debug directories are also discovered.
 `GRACEOPT_LLVM_BIN` or `--llvm-bin` selects tools explicitly. Windows builds
 require LLVM's shared library; the MSYS2 distribution used here supplies it.
 
+CI installs the archived MSYS2 `22.1.4-4` builds of Clang, Clang libraries, LLVM,
+LLVM libraries and LLVM tools together, then checks their versions before
+configuration. This keeps MSYS2 rolling updates from selecting an unsupported
+LLVM major. Update the complete package set when validating a new toolchain;
+LLVM 23 is not currently supported by this project.
+
 ## Analyze and transform IR
 
 ```sh
